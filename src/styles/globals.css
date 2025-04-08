@@ -1,329 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.btn-shadow {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px -4px inset;
+:root {
+  --primary: #FF3366;
+  --secondary: #00CCFF;
+  --accent: #FFD166;
+  --success: #06D6A0;
+  --error: #EF476F;
+  --background: #F0F4F8;
+  --dark-background: #1A1B25;
+  --card: #FFFFFF;
+  --dark-card: #252836;
 }
 
-.btn-shadow span {
-  display: block;
-  transform: translateY(-2px);
-}
-
-.btn-shadow:hover {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px -2px inset;
-}
-
-.btn-shadow:hover span {
-  transform: translateY(0);
-}
-
-.btn-shadow:active {
-  transform: translateY(1px);
-  box-shadow: none;
-}
-
-.text-outline {
-  -webkit-text-stroke: 2px rgba(0, 0, 0, 0.25);
-}
-
-.shadow-inset {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px -4px inset;
-}
-
-.spotlight {
-  position: absolute;
-  height: 200%;
-  width: 200%;
-  z-index: 100;
-  background-image: radial-gradient(
-    circle,
-    transparent 180px,
-    rgba(0, 0, 0, 0.6) 200px
-  );
-  opacity: 0;
-  left: -50%;
-  top: -50%;
-  transition: all 0.5s;
-  animation: spotlightAnim 2.5s ease-in;
-}
-
-@keyframes spotlightAnim {
-  0% {
-    left: -20%;
-    top: -20%;
+@layer base {
+  body {
+    @apply bg-brand-light dark:bg-brand-dark text-gray-800 dark:text-white transition-colors duration-200 font-sans;
   }
-  30% {
-    opacity: 100;
-    top: -80%;
-    left: -80%;
-  }
-  60% {
-    top: -50%;
-    left: -20%;
-  }
-  80% {
-    top: -50%;
-    left: -50%;
-  }
-  98% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold;
   }
 }
 
-.anim-show {
-  animation: show 0.5s ease-out;
-}
+@layer components {
+  /* Button Styles */
+  .btn {
+    @apply px-4 py-2 rounded-full font-medium transition-all duration-200 transform hover:scale-102 focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center;
+  }
+  
+  .btn-lg {
+    @apply px-6 py-3 text-lg;
+  }
+  
+  .btn-primary {
+    @apply btn bg-brand-red hover:bg-opacity-90 text-white focus:ring-brand-red;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-brand-blue hover:bg-opacity-90 text-white focus:ring-brand-blue;
+  }
+  
+  .btn-accent {
+    @apply btn bg-brand-yellow hover:bg-opacity-90 text-gray-800 focus:ring-brand-yellow;
+  }
+  
+  .btn-success {
+    @apply btn bg-brand-green hover:bg-opacity-90 text-white focus:ring-brand-green;
+  }
 
-.anim-timer {
-  animation: timer 1s ease-out infinite;
-}
+  .btn-ghost {
+    @apply btn bg-transparent border-2 border-current hover:bg-gray-100 dark:hover:bg-gray-800;
+  }
+  
+  /* Card Styles */
+  .card {
+    @apply bg-brand-card dark:bg-brand-dark-card rounded-2xl shadow-lg p-6 transition-all duration-200;
+  }
+  
+  .card-hover {
+    @apply hover:shadow-xl transform hover:-translate-y-1;
+  }
+  
+  /* Input Styles */
+  .input {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-700 focus:border-brand-blue dark:focus:border-brand-blue focus:ring-1 focus:ring-brand-blue dark:bg-gray-800 transition-all duration-200;
+  }
+  
+  /* Badge Styles */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .badge-primary {
+    @apply badge bg-brand-red bg-opacity-10 text-brand-red;
+  }
+  
+  .badge-secondary {
+    @apply badge bg-brand-blue bg-opacity-10 text-brand-blue;
+  }
+  
+  .badge-accent {
+    @apply badge bg-brand-yellow bg-opacity-20 text-gray-800;
+  }
+  
+  .badge-success {
+    @apply badge bg-brand-green bg-opacity-10 text-brand-green;
+  }
+  
+  /* Gradient Text */
+  .text-gradient {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-brand-red to-brand-blue;
+  }
+  
+  .text-gradient-animated {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-brand-red via-brand-blue to-brand-yellow animate-text-shimmer bg-[length:200%_auto];
+  }
 
-.anim-quizz {
-  animation: quizz 0.8s linear;
-  transform: perspective(1200px) rotateY(-15deg) rotateX(15deg)
-    translateZ(100px);
-  box-shadow: 10px 10px 0 rgba(20, 24, 29, 1);
-}
+  /* Custom Navbar */
+  .navbar {
+    @apply fixed top-0 left-0 right-0 z-50 bg-white dark:bg-brand-dark-card bg-opacity-80 dark:bg-opacity-80 backdrop-blur-md shadow transition-all duration-300;
+  }
 
-.anim-quizz .button {
-  box-shadow: rgba(0, 0, 0, 0.25) -4px -4px inset;
-  animation: quizzButton 0.8s ease-out;
-}
+  .dropdown-menu {
+    @apply absolute right-0 mt-2 w-48 rounded-xl overflow-hidden shadow-lg py-1 bg-white dark:bg-brand-dark-card ring-1 ring-black ring-opacity-5 focus:outline-none transform origin-top-right transition-all duration-200;
+  }
 
-.anim-balanced {
-  animation: balanced 0.8s linear infinite;
-}
+  /* Game elements */
+  .question-timer {
+    @apply w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+  }
 
-@keyframes balanced {
-  0% {
-    transform: rotate(0deg);
+  .timer-progress {
+    @apply h-full bg-brand-blue transition-all duration-1000 ease-linear rounded-full;
   }
-  25% {
-    transform: rotate(-10deg) translateY(-10px);
-  }
-  50% {
-    transform: rotate(0deg) translateY(0px);
-  }
-  75% {
-    transform: rotate(10deg) translateY(-10px);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
 
-@keyframes show {
-  0% {
-    transform: scale(0);
+  .game-grid {
+    @apply grid grid-cols-2 gap-4 md:gap-6;
   }
-  30% {
-    transform: scale(0.9);
-  }
-  60% {
-    transform: scale(0.8);
-  }
-  80% {
-    transform: scale(1);
-  }
-}
 
-@keyframes progressBar {
-  from {
-    width: 0%;
+  .answer-box {
+    @apply rounded-xl py-4 px-6 text-white font-medium text-lg shadow-lg transition-all duration-200 hover:scale-102 flex items-center cursor-pointer;
   }
-  to {
-    width: 100%;
-  }
-}
 
-@keyframes timer {
-  0% {
-    transform: scale(1);
+  .answer-box-red {
+    @apply bg-brand-red hover:bg-opacity-90;
   }
-  30% {
-    transform: scale(1.4) rotate(-6deg);
-  }
-  60% {
-    transform: scale(0.8) rotate(6deg);
-  }
-  80% {
-    transform: scale(1);
-  }
-}
 
-@keyframes quizz {
-  0% {
-    transform: scale(0) perspective(1200px) rotateY(-60deg) rotateX(60deg)
-      translateZ(100px);
+  .answer-box-blue {
+    @apply bg-brand-blue hover:bg-opacity-90;
   }
-  60% {
-    transform: scale(1) perspective(1200px) rotateY(-15deg) rotateX(15deg)
-      translateZ(100px);
-  }
-  80% {
-    transform: scale(0.8) perspective(1200px) rotateY(-15deg) rotateX(15deg)
-      translateZ(100px);
-  }
-  100% {
-    transform: scale(1) perspective(1200px) rotateY(-15deg) rotateX(15deg)
-      translateZ(100px);
-  }
-}
 
-@keyframes quizzButton {
-  0% {
-    transform: scale(0);
+  .answer-box-yellow {
+    @apply bg-brand-yellow hover:bg-opacity-90 text-gray-800;
   }
-  60% {
-    transform: scale(1);
-  }
-  80% {
-    transform: scale(0.8);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
 
+  .answer-box-green {
+    @apply bg-brand-green hover:bg-opacity-90;
+  }
 
-@keyframes progressBar {
-  from {
-    width: 0%;
+  /* Animation utilities */
+  .animated-bg {
+    @apply relative overflow-hidden;
   }
-  to {
-    width: 100%;
-  }
-}
 
-@keyframes countdown {
-  from {
-    width: 100%;
+  .animated-bg::before {
+    content: "";
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-slide;
   }
-  to {
-    width: 0%;
+
+  .animated-bg-slow::before {
+    @apply animate-slide-slow;
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+/* Keyframe animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
-.btn-shadow {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px -4px inset;
+@keyframes scale-up-center {
+  0% { transform: scale(0.5); }
+  100% { transform: scale(1); }
 }
 
-.btn-shadow span {
-  display: block;
-  transform: translateY(-2px);
+@keyframes slide-in-bottom {
+  0% { transform: translateY(50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
-.btn-shadow:hover {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px -2px inset;
+@keyframes slide-in-top {
+  0% { transform: translateY(-50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
-.btn-shadow:hover span {
-  transform: translateY(0);
+@keyframes fade-in-right {
+  0% { transform: translateX(50px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
 }
 
-.btn-shadow:active {
-  transform: translateY(1px);
-  box-shadow: none;
+@keyframes fade-in-left {
+  0% { transform: translateX(-50px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
 }
 
-.shadow-inset {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px -4px inset;
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
-.spotlight {
-  position: absolute;
-  height: 200%;
-  width: 200%;
-  z-index: 100;
-  background-image: radial-gradient(
-    circle,
-    transparent 180px,
-    rgba(0, 0, 0, 0.6) 200px
-  );
-  opacity: 0;
-  left: -50%;
-  top: -50%;
-  transition: all 0.5s;
-  animation: spotlightAnim 2.5s ease-in;
+.fade-in-down {
+  animation: fade-in-down 0.5s ease-out forwards;
 }
 
-@keyframes spotlightAnim {
-  0% {
-    left: -20%;
-    top: -20%;
-  }
-  30% {
-    opacity: 100;
-    top: -80%;
-    left: -80%;
-  }
-  60% {
-    top: -50%;
-    left: -20%;
-  }
-  80% {
-    top: -50%;
-    left: -50%;
-  }
-  98% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+.fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
 }
 
-.anim-show {
-  animation: show 0.5s ease-out;
+.scale-up-center {
+  animation: scale-up-center 0.4s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
 }
 
-.anim-balanced {
-  animation: balanced 0.8s linear infinite;
+.slide-in-bottom {
+  animation: slide-in-bottom 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
 }
 
-@keyframes balanced {
-  0% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-10deg) translateY(-10px);
-  }
-  50% {
-    transform: rotate(0deg) translateY(0px);
-  }
-  75% {
-    transform: rotate(10deg) translateY(-10px);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
+.slide-in-top {
+  animation: slide-in-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
 }
 
-@keyframes show {
-  0% {
-    transform: scale(0);
-  }
-  30% {
-    transform: scale(0.9);
-  }
-  60% {
-    transform: scale(0.8);
-  }
-  80% {
-    transform: scale(1);
-  }
+.fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }

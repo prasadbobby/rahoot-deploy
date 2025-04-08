@@ -1,4 +1,3 @@
-// src/components/CustomConfetti.js
 import { useEffect, useState } from 'react';
 
 export default function CustomConfetti({ active }) {
@@ -12,26 +11,30 @@ export default function CustomConfetti({ active }) {
     
     // Create confetti particles
     const newParticles = [];
-    const colors = ['#f44336', '#2196f3', '#ffeb3b', '#4caf50', '#9c27b0'];
+    const colors = [
+      '#FF3366', '#00CCFF', '#FFD166', '#06D6A0', 
+      '#EF476F', '#118AB2', '#FFD166', '#06D6A0'
+    ];
     
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 150; i++) {
       newParticles.push({
         id: i,
         x: Math.random() * 100,
-        y: -10,
-        size: 5 + Math.random() * 10,
+        y: -10 - Math.random() * 20, // Start slightly off-screen
+        size: 5 + Math.random() * 15,
         color: colors[Math.floor(Math.random() * colors.length)],
         speed: 2 + Math.random() * 5,
         delay: Math.random() * 5,
+        rotation: Math.random() * 360,
+        rotationSpeed: -5 + Math.random() * 10,
       });
     }
     
     setParticles(newParticles);
     
-    // Cleanup
     const timer = setTimeout(() => {
       setParticles([]);
-    }, 7000);
+    }, 8000);
     
     return () => {
       clearTimeout(timer);
@@ -55,6 +58,7 @@ export default function CustomConfetti({ active }) {
             backgroundColor: particle.color,
             animationDuration: `${particle.speed}s`,
             animationDelay: `${particle.delay}s`,
+            transform: `rotate(${particle.rotation}deg)`,
           }}
         />
       ))}

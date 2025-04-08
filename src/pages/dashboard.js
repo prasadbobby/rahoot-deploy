@@ -1,18 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import toast from 'react-hot-toast';
-import { FaTrophy, FaPlay, FaHistory } from 'react-icons/fa';
-import { fetchUserResults, fetchQuizzes, joinQuiz } from '@/lib/api'; // Add joinQuiz import here
+import { fetchUserResults, fetchQuizzes, joinQuiz } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import {
+    FaPlay, FaHistory, FaTrophy, FaSearch, FaChartBar,
+    FaStar, FaMedal, FaCrown, FaGraduationCap, FaShieldAlt,
+    FaEye, FaClock, FaExclamationCircle, FaArrowRight
+} from 'react-icons/fa';
 
 export default function Dashboard() {
-    const [userResults, setUserResults] = useState([]);
-    const [quizzes, setQuizzes] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [joinCode, setJoinCode] = useState(''); // Add this state
-    const [joiningQuiz, setJoiningQuiz] = useState(false); // Add this state
     const router = useRouter();
     const { user, loading: authLoading } = useAuth();
+    const [userResults, setUserResults] = useState([]);
+    const [quizzes, setQuizzes] = useState([]);
+    const [filteredQuizzes, setFilteredQuizzes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [joinCode, setJoinCode] = useState('');
+    const [joiningQuiz, setJoiningQuiz] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeTab, setActiveTab] = useState('available'); // available, history
 
     useEffect(() => {
         async function loadData() {
@@ -29,6 +37,7 @@ export default function Dashboard() {
                     ]);
                     setUserResults(resultsData);
                     setQuizzes(quizzesData);
+                    setFilteredQuizzes(quizzesData);
                 } catch (error) {
                     toast.error('Failed to load dashboard data');
                 } finally {
@@ -40,165 +49,503 @@ export default function Dashboard() {
         loadData();
     }, [user, authLoading, router]);
 
-    const handleJoinQuiz = async () => {
+    useEffect(() => {
+        if (quizzes.length > 0 && searchTerm) {
+            const filtered = quizzes.filter(quiz =>
+                quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                quiz.subject.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredQuizzes(filtered);
+        } else {
+            setFilteredQuizzes(quizzes);
+        }
+    }, [searchTerm, quizzes]);
+
+    const handleJoinQuiz = async (code = joinCode) => {
         try {
-            if (!joinCode || joinCode.trim() === '') {
-                toast.error('Please enter a valid quiz code');
+            if (!code || code.trim() === '') {
+                toast.error('Please enter a valid quiz code', {
+                    icon: '🔢',
+                    style: { borderRadius: '10px', background: '#333', color: '#fff' }
+                });
                 return;
             }
 
             setJoiningQuiz(true);
-            console.log(`Attempting to join quiz with code: ${joinCode}`);
 
-            const quiz = await joinQuiz(joinCode);
-            console.log('Quiz join response:', quiz);
+            const quiz = await joinQuiz(code);
 
             if (quiz && quiz.id) {
                 router.push(`/play/${quiz.id}`);
             } else {
-                toast.error('Failed to get quiz details');
+                toast.error('Failed to get quiz details', {
+                    icon: '❌',
+                    style: { borderRadius: '10px', background: '#333', color: '#fff' }
+                });
             }
         } catch (error) {
-            console.error('Error joining quiz:', error);
-            toast.error('Failed to join quiz. Please check the code and try again.');
+            toast.error('Failed to join quiz. Please check the code and try again.', {
+                icon: '⚠️',
+                style: { borderRadius: '10px', background: '#333', color: '#fff' }
+            });
         } finally {
             setJoiningQuiz(false);
         }
     };
 
+    const calculateAchievements = () => {
+        const achievements = [
+            {
+                id: 'first-quiz',
+                title: 'First Quiz',
+                description: 'Completed your first quiz',
+                icon: <FaStar className="h-5 w-5" />,
+                unlocked: userResults.length > 0,
+                color: 'from-green-400 to-brand-green'
+            },
+            {
+                id: 'explorer',
+                title: 'Quiz Explorer',
+                description: 'Completed 5 different quizzes',
+                icon: <FaPlay className="h-5 w-5" />,
+                unlocked: new Set(userResults.map(r => r.quizId)).size >= 5,
+                color: 'from-brand-blue to-blue-600'
+            },
+            {
+                id: 'perfect',
+                title: 'Perfect Score',
+                description: 'Got a perfect score in any quiz',
+                icon: <FaCrown className="h-5 w-5" />,
+                unlocked: userResults.some(r => (r.score / r.maxScore) === 1),
+                color: 'from-brand-yellow to-amber-500'
+            },
+            {
+                id: 'master',
+                title: 'Quiz Master',
+                description: 'Completed 10+ quizzes',
+                icon: <FaMedal className="h-5 w-5" />,
+                unlocked: userResults.length >= 10,
+                color: 'from-brand-red to-rose-600'
+            },
+            {
+                id: 'scholar',
+                title: 'Quiz Scholar',
+                description: 'Average score above 80%',
+                icon: <FaGraduationCap className="h-5 w-5" />,
+                unlocked: userResults.length > 0 &&
+                    (userResults.reduce((sum, r) => sum + (r.score / r.maxScore), 0) / userResults.length) >= 0.8,
+                color: 'from-purple-500 to-purple-700'
+            },
+            {
+                id: 'veteran',
+                title: 'Quiz Veteran',
+                description: 'Completed 20+ quizzes',
+                icon: <FaShieldAlt className="h-5 w-5" />,
+                unlocked: userResults.length >= 20,
+                color: 'from-teal-500 to-teal-700'
+            }
+        ];
+
+        return achievements;
+    };
 
     if (loading || authLoading) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-600"></div>
+            <div className="pt-28 flex justify-center items-center h-60">
+                <div className="relative">
+                    <div className="h-24 w-24 rounded-full border-t-4 border-b-4 border-brand-blue animate-spin"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-16 w-16 rounded-full border-t-4 border-b-4 border-brand-red animate-spin animate-delay-150"></div>
+                    </div>
+                </div>
             </div>
         );
     }
 
-    return (
-        <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row items-start gap-8">
-                {/* Recent Results */}
-                <div className="w-full md:w-2/3 bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                    <div className="flex items-center mb-6">
-                        <FaHistory className="text-indigo-600 dark:text-indigo-400 text-2xl mr-2" />
-                        <h2 className="text-2xl font-bold dark:text-white">Your Recent Results</h2>
-                    </div>
+    const achievements = calculateAchievements();
+    const unlockedAchievements = achievements.filter(a => a.unlocked).length;
 
-                    {userResults.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            <p>You haven't completed any quizzes yet.</p>
-                            <p>Join a quiz to see your results here!</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {userResults.map((result) => (
-                                <div key={result.id} className="border dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <h3 className="font-bold text-lg dark:text-white">{result.quizTitle}</h3>
-                                            <p className="text-gray-600 dark:text-gray-400">{result.quizSubject}</p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                {new Date(result.completedAt).toLocaleDateString()}
-                                            </p>
+    return (
+        <div className="pt-24 pb-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Dashboard Header */}
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold">Welcome, {user?.name || 'User'}</h1>
+                    <p className="text-gray-600 dark:text-gray-400">Let's continue learning and having fun!</p>
+                </div>
+
+                {/* Join Quiz Section */}
+                <div className="bg-gradient-to-r from-brand-red to-brand-blue p-0.5 rounded-2xl mb-8">
+                    <div className="card rounded-2xl bg-white dark:bg-brand-dark-card">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2 p-6">
+                                <h2 className="text-xl font-bold mb-2 flex items-center">
+                                    <FaPlay className="mr-2 text-brand-red" />
+                                    Join a Quiz
+                                </h2>
+                                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                    Enter a 6-digit code to join a quiz game instantly
+                                </p>
+
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter quiz code"
+                                        value={joinCode}
+                                        onChange={(e) => setJoinCode(e.target.value.slice(0, 6))}
+                                        maxLength={6}
+                                        className="input text-center text-xl tracking-widest font-medium flex-grow"
+                                    />
+                                    <button
+                                        onClick={() => handleJoinQuiz()}
+                                        disabled={joiningQuiz || !joinCode || joinCode.length < 6}
+                                        className="btn-primary whitespace-nowrap min-w-[120px]"
+                                    >
+                                        {joiningQuiz ? (
+                                            <div className="flex items-center justify-center">
+                                                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Joining...
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <FaPlay className="mr-2" />
+                                                Join Quiz
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="bg-brand-dark p-6 rounded-2xl lg:rounded-l-none lg:rounded-r-xl flex flex-col items-center justify-center relative overflow-hidden">
+                                {/* Animated background */}
+                                <div className="absolute inset-0 overflow-hidden opacity-20">
+                                    <div className="absolute top-0 left-0 w-full animate-slide">
+                                        <div className="flex">
+                                            {Array.from({ length: 20 }).map((_, i) => (
+                                                <div key={i} className="flex-none w-12 h-12 mx-1 rounded-full bg-white"></div>
+                                            ))}
                                         </div>
-                                        <div className="text-right">
-                                            <div className="font-bold text-xl dark:text-white">
-                                                {result.score} / {result.maxScore}
-                                            </div>
-                                            <div className="text-indigo-600 dark:text-indigo-400">
-                                                {Math.round((result.score / result.maxScore) * 100)}%
-                                            </div>
+                                    </div>
+                                    <div className="absolute top-20 left-0 w-full animate-slide" style={{ animationDelay: '0.5s', animationDuration: '20s' }}>
+                                        <div className="flex">
+                                            {Array.from({ length: 20 }).map((_, i) => (
+                                                <div key={i} className="flex-none w-8 h-8 mx-1 rounded-full bg-brand-yellow"></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="absolute top-40 left-0 w-full animate-slide" style={{ animationDelay: '1s', animationDuration: '25s' }}>
+                                        <div className="flex">
+                                            {Array.from({ length: 20 }).map((_, i) => (
+                                                <div key={i} className="flex-none w-10 h-10 mx-1 rounded-full bg-brand-blue"></div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+
+                                <div className="relative z-10 text-white text-center">
+                                    <div className="text-5xl font-bold text-center mb-3">
+                                        {userResults.length}
+                                    </div>
+                                    <p className="text-xl opacity-90">Quizzes Completed</p>
+
+                                    {userResults.length > 0 && (
+                                        <div className="mt-4 bg-white/10 p-2 rounded-lg">
+                                            <p className="text-sm">
+                                                Last Quiz: {new Date(userResults[0]?.completedAt || Date.now()).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    )}
+                    </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="w-full md:w-1/3 space-y-6">
-                    {/* Join Quiz */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                        <h2 className="text-xl font-bold mb-4 dark:text-white">Join a Quiz</h2>
-                        <div className="space-y-2">
-                            <input
-                                type="text"
-                                placeholder="Enter Quiz Code"
-                                value={joinCode}
-                                onChange={(e) => setJoinCode(e.target.value)}
-                                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                            />
-                            <button
-                                onClick={handleJoinQuiz}
-                                disabled={joiningQuiz}
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium flex items-center justify-center"
-                            >
-                                {joiningQuiz ? (
-                                    <span>Joining...</span>
-                                ) : (
-                                    <>
-                                        <FaPlay className="mr-2" />
-                                        Join Quiz
-                                    </>
-                                )}
-                            </button>
+                {/* Main Content Area */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Left Column - Quizzes */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Quizzes Tabs */}
+                        <div className="card">
+                            <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+                                <button
+                                    onClick={() => setActiveTab('available')}
+                                    className={`py-4 px-6 font-medium text-sm border-b-2 transition-colors duration-200 ${activeTab === 'available'
+                                        ? 'border-brand-red text-brand-red'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                                        }`}
+                                >
+                                    Available Quizzes
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('history')}
+                                    className={`py-4 px-6 font-medium text-sm border-b-2 transition-colors duration-200 ${activeTab === 'history'
+                                        ? 'border-brand-red text-brand-red'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                                        }`}
+                                >
+                                    Quiz History
+                                </button>
+                            </div>
+
+                            {/* Search Bar */}
+                            <div className="relative mb-6">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <FaSearch className="text-gray-400" />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder={`Search ${activeTab === 'available' ? 'quizzes' : 'history'}...`}
+                                    className="input pl-10 pr-4 py-2"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Available Quizzes Tab Content */}
+                            {activeTab === 'available' && (
+                                <>
+                                    {filteredQuizzes.length === 0 ? (
+                                        <div className="text-center py-10 bg-gray-50 dark:bg-brand-dark rounded-xl border border-gray-200 dark:border-gray-700">
+                                            <FaExclamationCircle className="text-gray-400 text-4xl mx-auto mb-3" />
+                                            <p className="text-gray-600 dark:text-gray-400 mb-1">No quizzes found</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-500">
+                                                {searchTerm ? "Try a different search term" : "Check back later for new quizzes"}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {filteredQuizzes.map((quiz) => (
+                                                <motion.div
+                                                    key={quiz.id}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ duration: 0.3 }}
+                                                    className="card card-hover p-4 border border-gray-100 dark:border-gray-700"
+                                                >
+                                                    <div className="mb-3">
+                                                        <h3 className="font-bold text-lg mb-1 line-clamp-1">{quiz.title}</h3>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <span className="badge badge-primary">{quiz.subject}</span>
+                                                            <span className="badge bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                                                {quiz.questionCount} questions
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="bg-brand-blue/10 text-brand-blue px-3 py-1 rounded-full font-mono">
+                                                            {quiz.code}
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleJoinQuiz(quiz.code)}
+                                                            className="btn-primary py-1 px-3 text-sm"
+                                                        >
+                                                            Play
+                                                        </button>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {/* History Tab Content */}
+                            {activeTab === 'history' && (
+                                <>
+                                    {userResults.length === 0 ? (
+                                        <div className="text-center py-10 bg-gray-50 dark:bg-brand-dark rounded-xl border border-gray-200 dark:border-gray-700">
+                                            <FaHistory className="text-gray-400 text-4xl mx-auto mb-3" />
+                                            <p className="text-gray-600 dark:text-gray-400 mb-1">No quiz history yet</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-500">
+                                                Join a quiz to start building your history!
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                                            {userResults
+                                                .filter(result =>
+                                                    !searchTerm ||
+                                                    result.quizTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                    result.quizSubject?.toLowerCase().includes(searchTerm.toLowerCase())
+                                                )
+                                                .map((result) => (
+                                                    <motion.div
+                                                        key={result.id}
+                                                        initial={{ opacity: 0, x: -20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ duration: 0.3 }}
+                                                        className="card p-4 border border-gray-100 dark:border-gray-700"
+                                                    >
+                                                        <div className="flex justify-between items-start">
+                                                            <div>
+                                                                <h3 className="font-bold text-lg mb-1">{result.quizTitle}</h3>
+                                                                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 gap-2">
+                                                                    {result.quizSubject && (
+                                                                        <span className="badge badge-primary">{result.quizSubject}</span>
+                                                                    )}
+                                                                    <div className="flex items-center">
+                                                                        <FaClock className="mr-1 text-xs" />
+                                                                        {new Date(result.completedAt).toLocaleDateString()}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <div className={`text-lg font-bold ${(result.score / result.maxScore) >= 0.8 ? 'text-brand-green' :
+                                                                    (result.score / result.maxScore) >= 0.6 ? 'text-brand-yellow' :
+                                                                        'text-gray-700 dark:text-gray-300'
+                                                                    }`}>
+                                                                    {result.score} <span className="text-sm text-gray-500 dark:text-gray-400">/ {result.maxScore}</span>
+                                                                </div>
+                                                                <div className={`text-sm font-medium ${(result.score / result.maxScore) >= 0.8 ? 'text-brand-green' :
+                                                                    (result.score / result.maxScore) >= 0.6 ? 'text-brand-yellow' :
+                                                                        'text-gray-600 dark:text-gray-400'
+                                                                    }`}>
+                                                                    {Math.round((result.score / result.maxScore) * 100)}%
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
 
-                    {/* Available Quizzes */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                        <h2 className="text-xl font-bold mb-4 dark:text-white">Available Quizzes</h2>
-                        {quizzes.length === 0 ? (
-                            <p className="text-gray-500 dark:text-gray-400 text-center py-4">No quizzes available</p>
-                        ) : (
+                    {/* Right Column - Stats & Achievements */}
+                    <div className="space-y-8">
+                        {/* Stats Card */}
+                        <div className="card">
+                            <h2 className="text-xl font-bold mb-4 flex items-center">
+                                <FaChartBar className="mr-2 text-brand-blue" />
+                                Your Stats
+                            </h2>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="bg-gradient-to-br from-brand-red/10 to-rose-500/10 rounded-xl p-4 text-center">
+                                    <div className="text-2xl font-bold text-brand-red">
+                                        {userResults.length}
+                                    </div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                        Quizzes Taken
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-brand-green/10 to-emerald-500/10 rounded-xl p-4 text-center">
+                                    <div className="text-2xl font-bold text-brand-green">
+                                        {userResults.filter(r => (r.score / r.maxScore) >= 0.8).length}
+                                    </div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                        High Scores
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-brand-blue/10 to-cyan-500/10 rounded-xl p-4 text-center">
+                                    <div className="text-2xl font-bold text-brand-blue">
+                                        {new Set(userResults.map(r => r.quizId)).size}
+                                    </div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                        Unique Quizzes
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-brand-yellow/10 to-amber-500/10 rounded-xl p-4 text-center">
+                                    <div className="text-2xl font-bold text-brand-yellow">
+                                        {unlockedAchievements}
+                                    </div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                        Achievements
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Average Score Progress Bar */}
+                            {userResults.length > 0 && (
+                                <div className="mb-2">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Average Score</div>
+                                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {Math.round((userResults.reduce((sum, r) => sum + (r.score / r.maxScore), 0) / userResults.length) * 100)}%
+                                        </div>
+                                    </div>
+                                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-brand-red via-brand-yellow to-brand-green rounded-full"
+                                            style={{ width: `${Math.round((userResults.reduce((sum, r) => sum + (r.score / r.maxScore), 0) / userResults.length) * 100)}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Achievements Card */}
+                        <div className="card">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold flex items-center">
+                                    <FaTrophy className="mr-2 text-brand-yellow" />
+                                    Achievements
+                                </h2>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
+                                    {unlockedAchievements}/{achievements.length} unlocked
+                                </span>
+                            </div>
+
                             <div className="space-y-3">
-                                {quizzes.slice(0, 5).map((quiz) => (
-                                    <div key={quiz.id} className="border dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                        <h3 className="font-bold dark:text-white">{quiz.title}</h3>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">{quiz.subject}</p>
-                                        <div className="flex justify-between items-center mt-2">
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">Code: {quiz.code}</span>
-                                            <button
-                                                onClick={() => handleJoinQuiz(quiz.code)}
-                                                className="bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 px-3 py-1 rounded text-sm font-medium"
-                                            >
-                                                Join
-                                            </button>
+                                {achievements.map((achievement) => (
+                                    <div
+                                        key={achievement.id}
+                                        className={`p-4 rounded-xl flex items-start ${achievement.unlocked
+                                            ? 'bg-gradient-to-r ' + achievement.color + ' text-white'
+                                            : 'bg-gray-100 dark:bg-gray-800 opacity-60'
+                                            }`}
+                                    >
+                                        <div className={`mr-3 h-10 w-10 rounded-full flex items-center justify-center ${achievement.unlocked
+                                            ? 'bg-white/20'
+                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                                            }`}>
+                                            {achievement.icon}
+                                        </div>
+                                        <div>
+                                            <div className="font-medium">
+                                                {achievement.title}
+                                            </div>
+                                            <div className={`text-sm ${achievement.unlocked ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                {achievement.description}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        )}
-                    </div>
-
-                    {/* Achievements */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                        <div className="flex items-center mb-4">
-                            <FaTrophy className="text-yellow-500 text-2xl mr-2" />
-                            <h2 className="text-xl font-bold dark:text-white">Your Achievements</h2>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className={`p-3 rounded-lg ${userResults.length > 0 ? 'bg-indigo-100 dark:bg-indigo-900' : 'bg-gray-100 dark:bg-gray-700'} text-center`}>
-                                <div className={`font-bold ${userResults.length > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                                    First Quiz
-                                </div>
-                            </div>
-                            <div className={`p-3 rounded-lg ${userResults.length >= 5 ? 'bg-indigo-100 dark:bg-indigo-900' : 'bg-gray-100 dark:bg-gray-700'} text-center`}>
-                                <div className={`font-bold ${userResults.length >= 5 ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                                    Quiz Explorer
-                                </div>
-                            </div>
-                            <div className={`p-3 rounded-lg ${userResults.some(r => (r.score / r.maxScore) === 1) ? 'bg-indigo-100 dark:bg-indigo-900' : 'bg-gray-100 dark:bg-gray-700'} text-center`}>
-                                <div className={`font-bold ${userResults.some(r => (r.score / r.maxScore) === 1) ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                                    Perfect Score
-                                </div>
-                            </div>
-                            <div className={`p-3 rounded-lg ${userResults.length >= 10 ? 'bg-indigo-100 dark:bg-indigo-900' : 'bg-gray-100 dark:bg-gray-700'} text-center`}>
-                                <div className={`font-bold ${userResults.length >= 10 ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                                    Quiz Master
-                                </div>
+
+                        {/* Quick Access Card */}
+                        <div className="card bg-gradient-to-br from-brand-blue to-indigo-600 text-white">
+                            <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+
+                            <div className="space-y-3">
+                            {user && user.isAdmin && (
+ // Make sure to use isAdmin function not user.isAdmin property
+                                    <a
+                                        href="/admin/create"
+                                        className="btn-accent w-full group"
+                                    >
+                                        <FaPlus className="mr-2" />
+                                        Create New Quiz
+                                    </a>
+                                )}
+
+                                <a
+                                    href="#"
+                                    className="btn bg-white/20 hover:bg-white/30 text-white border-white/30 w-full group"
+                                >
+                                    <FaHistory className="mr-2" />
+                                    View All Results
+                                </a>
                             </div>
                         </div>
                     </div>

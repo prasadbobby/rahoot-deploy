@@ -1,6 +1,11 @@
-export default function Form({ children }) {
+import clsx from "clsx"
+
+export default function Form({ children, className }) {
   return (
-    <div className="z-10 flex w-full max-w-80 flex-col gap-4 rounded-md bg-white p-4 shadow-sm">
+    <div className={clsx(
+      "z-10 flex w-full max-w-md flex-col gap-4 rounded-xl bg-white dark:bg-slate-800 p-6 shadow-lg border border-gray-100 dark:border-slate-700",
+      className
+    )}>
       {children}
     </div>
   )
