@@ -10,6 +10,7 @@ import {
   FaTachometerAlt, FaCog, FaExclamationCircle, FaListUl, FaTh,
   FaEllipsisH, FaExternalLinkAlt
 } from 'react-icons/fa';
+import AdminGuard from '@/components/guards/AdminGuard';
 
 export default function AdminDashboard() {
   const [quizzes, setQuizzes] = useState([]);
@@ -110,6 +111,7 @@ export default function AdminDashboard() {
 
   if (loading || authLoading) {
     return (
+      
       <div className="pt-28 flex justify-center items-center h-60">
         <div className="relative">
           <div className="h-24 w-24 rounded-full border-t-4 border-b-4 border-brand-blue animate-spin"></div>
@@ -122,6 +124,7 @@ export default function AdminDashboard() {
   }
 
   return (
+    <AdminGuard>
     <div className="pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Admin Header */}
@@ -545,5 +548,6 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
     </div>
+    </AdminGuard>
   );
 }

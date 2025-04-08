@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import {
     FaPlay, FaHistory, FaTrophy, FaSearch, FaChartBar,
     FaStar, FaMedal, FaCrown, FaGraduationCap, FaShieldAlt,
-    FaEye, FaClock, FaExclamationCircle, FaArrowRight
+    FaEye, FaClock, FaExclamationCircle, FaArrowRight, FaPlus
 } from 'react-icons/fa';
 
 export default function Dashboard() {
@@ -531,8 +531,9 @@ export default function Dashboard() {
                             {user && user.isAdmin && (
  // Make sure to use isAdmin function not user.isAdmin property
                                     <a
-                                        href="/admin/create"
-                                        className="btn-accent w-full group"
+                                    href="/admin/create"
+                                    className="btn-secondary btn-lg group"
+                                
                                     >
                                         <FaPlus className="mr-2" />
                                         Create New Quiz

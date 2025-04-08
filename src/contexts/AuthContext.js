@@ -12,12 +12,20 @@ export function AuthProvider({ children }) {
     // Check if user is stored in localStorage
     const storedUser = localStorage.getItem('rahoot_user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const userData = JSON.parse(storedUser);
+      // Add isAdmin property to user object based on email
+      const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',') || [];
+      userData.isAdmin = adminEmails.includes(userData.email);
+      setUser(userData);
     }
     setLoading(false);
   }, []);
 
   const login = async (userData) => {
+    // Add isAdmin property to user object
+    const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',') || [];
+    userData.isAdmin = adminEmails.includes(userData.email);
+    
     localStorage.setItem('rahoot_user', JSON.stringify(userData));
     setUser(userData);
     return userData;
@@ -31,8 +39,7 @@ export function AuthProvider({ children }) {
 
   const isAdmin = () => {
     if (!user) return false;
-    const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',') || [];
-    return adminEmails.includes(user.email);
+    return user.isAdmin === true;
   };
 
   return (
