@@ -1,0 +1,156 @@
+{
+  "users": [
+    {
+      "id": "116911493717729573933",
+      "email": "knvdurgaprasad610@gmail.com",
+      "name": "Prasad Bobby",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocI8yAoDYH5ig8GqDqbe1E9N5ngOpJIutuy27oEFD7CTz-KPIwYbTg=s96-c",
+      "createdAt": "2025-04-07T14:48:44.799Z",
+      "lastLogin": "2025-04-08T01:03:03.993Z"
+    },
+    {
+      "id": "116724717905662795487",
+      "email": "bobby.hacktoberfest@gmail.com",
+      "name": "Bobby",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocIKYbSUEBUz-yuW-0LtweElEasTjWeQOQ53DwbI5tmyZUdqWw=s96-c",
+      "createdAt": "2025-04-07T15:01:32.657Z",
+      "lastLogin": "2025-04-08T01:03:57.208Z"
+    },
+    {
+      "id": "107869697314826311169",
+      "email": "bobshipping.online@gmail.com",
+      "name": "BoB Shipping",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ_1C00N1ultt5BaMyssWI31S16fu3QBTnsJrTwgphI1d8cgA=s96-c",
+      "createdAt": "2025-04-07T17:07:47.120Z",
+      "lastLogin": "2025-04-07T17:07:47.120Z"
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "code": "913751",
+      "title": "html",
+      "subject": "HTML",
+      "questions": [
+        {
+          "question": "what is html",
+          "answers": [
+            "html",
+            "h",
+            "hh",
+            "ha"
+          ],
+          "solution": 0,
+          "image": "",
+          "time": 15,
+          "cooldown": 5
+        }
+      ],
+      "createdBy": "116911493717729573933",
+      "createdAt": "2025-04-07T17:05:32.836Z",
+      "updatedAt": "2025-04-07T17:06:07.859Z"
+    }
+  ],
+  "results": [
+    {
+      "id": "2b6dac2b-6d34-4f3b-89e8-0f3f8e18f741",
+      "quizId": "442601af-c211-4e70-8a33-c4c96849986d",
+      "quizTitle": "test quiz",
+      "date": "2025-04-07T15:39:44.162Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 1000
+        }
+      ]
+    },
+    {
+      "id": "0c98dec2-a519-4418-84e7-b9272719c617",
+      "quizId": "442601af-c211-4e70-8a33-c4c96849986d",
+      "quizTitle": "test quiz",
+      "date": "2025-04-07T16:10:33.519Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 1000
+        }
+      ]
+    },
+    {
+      "id": "de1dedcd-5d49-40fa-b74d-4bad468113c9",
+      "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "quizTitle": "html",
+      "date": "2025-04-07T17:09:10.488Z",
+      "players": [
+        {
+          "username": "BoB Shipping",
+          "score": 1000
+        },
+        {
+          "username": "Bobby",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "id": "48f00ac4-ea13-4960-8876-953b88145e77",
+      "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "quizTitle": "html",
+      "date": "2025-04-08T01:05:14.449Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "id": "88e18fb7-1259-4c64-be20-d676dbe5082b",
+      "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "quizTitle": "html",
+      "date": "2025-04-08T01:13:48.544Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 630
+        }
+      ]
+    },
+    {
+      "id": "9010b1aa-bd9b-44eb-ace0-19eb0435565c",
+      "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "quizTitle": "html",
+      "date": "2025-04-08T01:14:27.040Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 238
+        }
+      ]
+    },
+    {
+      "id": "212833bb-da75-4d90-9ae7-92c6db959a2e",
+      "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "quizTitle": "html",
+      "date": "2025-04-08T01:16:22.203Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 868
+        }
+      ]
+    },
+    {
+      "id": "9d1019f9-77ee-4988-9145-f047fcc0e6e8",
+      "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "quizTitle": "html",
+      "date": "2025-04-08T01:17:09.840Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 0
+        }
+      ]
+    }
+  ]
+}
