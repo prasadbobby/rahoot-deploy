@@ -1,5 +1,6 @@
 // src/contexts/AuthContext.js
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
@@ -25,6 +26,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem('rahoot_user');
     setUser(null);
+    toast.success('Logged out successfully');
   };
 
   const isAdmin = () => {

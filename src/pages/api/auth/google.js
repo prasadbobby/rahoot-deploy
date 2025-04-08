@@ -11,57 +11,64 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { tokenId, userData } = req.body;
+  const { credential } = req.body;
 
   try {
     // Verify the Google token
     const ticket = await client.verifyIdToken({
-      idToken: tokenId,
+      idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
     
     const payload = ticket.getPayload();
     
-    // Ensure the token's user information matches what was sent
-    if (payload.sub !== userData.id || payload.email !== userData.email) {
-      return res.status(401).json({ error: 'Token validation failed' });
-    }
+    // Create user data
+    const userData = {
+      id: payload.sub,
+      email: payload.email,
+      name: payload.name,
+      picture: payload.picture,
+      firstName: payload.given_name,
+      lastName: payload.family_name,
+    };
     
-    // Read data file
-    let data;
+    // Add or update user in data.json
     try {
-      const fileContents = fs.readFileSync(dataFilePath, 'utf8');
-      data = JSON.parse(fileContents);
+      let data;
+      try {
+        const fileContents = fs.readFileSync(dataFilePath, 'utf8');
+        data = JSON.parse(fileContents);
+      } catch (error) {
+        data = { users: [], quizzes: [], results: [] };
+      }
+      
+      // Check if user already exists
+      const existingUserIndex = data.users.findIndex(user => user.id === userData.id);
+      
+      if (existingUserIndex !== -1) {
+        // Update existing user
+        data.users[existingUserIndex] = {
+          ...data.users[existingUserIndex],
+          ...userData,
+          lastLogin: new Date().toISOString(),
+        };
+      } else {
+        // Add new user
+        data.users.push({
+          ...userData,
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString(),
+        });
+      }
+      
+      fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
-      data = { quizzes: [], users: [], results: [] };
+      console.error('Error saving user data:', error);
     }
-    
-    // Check if user already exists
-    const existingUserIndex = data.users.findIndex(user => user.id === userData.id);
-    
-    if (existingUserIndex >= 0) {
-      // Update existing user
-      data.users[existingUserIndex] = {
-        ...data.users[existingUserIndex],
-        email: userData.email,
-        name: userData.name,
-        picture: userData.picture,
-        lastLogin: new Date().toISOString(),
-      };
-    } else {
-      // Add new user
-      data.users.push({
-        ...userData,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      });
-    }
-    
-    fs.writeFileSync(dataFilePath, JSON.stringify(data), 'utf8');
     
     return res.status(200).json(userData);
   } catch (error) {
-    console.error('Auth error:', error);
+    console.error('Google auth error:', error);
     return res.status(401).json({ error: 'Authentication failed' });
   }
 }
