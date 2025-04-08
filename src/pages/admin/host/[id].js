@@ -14,9 +14,10 @@ export default function HostQuiz() {
     const { id } = router.query;
     const { user, isAdmin } = useAuth();
     const { socket } = useSocket();
-
+    const [allPlayersAnswered, setAllPlayersAnswered] = useState(false);
     const [quiz, setQuiz] = useState(null);
-    const [gameState, setGameState] = useState('waiting'); // waiting, question, results, leaderboard, final
+    const [gameState, setGameState] = useState('waiting'); // waiting, preview, question, results, leaderboard, final
+    const [previewTimeLeft, setPreviewTimeLeft] = useState(0);
     const [players, setPlayers] = useState([]);
     const [roomCode, setRoomCode] = useState('');
     const [question, setQuestion] = useState(null);
@@ -26,6 +27,30 @@ export default function HostQuiz() {
     const [timeLeft, setTimeLeft] = useState(0);
     const [copySuccess, setCopySuccess] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('game:questionPreview', (data) => {
+            setQuestion(data);
+            setPreviewTimeLeft(data.previewTime);
+            setGameState('preview');
+
+            const timer = setInterval(() => {
+                setPreviewTimeLeft((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        });
+
+        return () => {
+            socket.off('game:questionPreview');
+        };
+    }, [socket]);
 
     // Load quiz data
     useEffect(() => {
@@ -132,6 +157,9 @@ export default function HostQuiz() {
         socket.on('error', (message) => {
             toast.error(message);
         });
+        socket.on('host:allPlayersAnswered', () => {
+            setAllPlayersAnswered(true);
+          });
 
         return () => {
             socket.off('host:roomCreated');
@@ -205,8 +233,8 @@ export default function HostQuiz() {
                                 onClick={startGame}
                                 disabled={players.length === 0}
                                 className={`px-4 py-2 rounded-lg font-medium flex items-center ${players.length === 0
-                                        ? 'bg-gray-400 cursor-not-allowed'
-                                        : 'bg-green-500 hover:bg-green-600'
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-green-500 hover:bg-green-600'
                                     }`}
                             >
                                 <FaPlay className="mr-2" />
@@ -222,6 +250,70 @@ export default function HostQuiz() {
                                 <FaChartBar className="mr-2" />
                                 Show Results
                             </button>
+                        )}
+
+                        {gameState === 'preview' && question && (
+                            <motion.div
+                                key="preview"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+                            >
+                                <div className="flex justify-between items-center mb-6">
+                                    <span className="text-gray-600 dark:text-gray-400">
+                                        Question {question.questionIndex + 1} of {question.totalQuestions}
+                                    </span>
+                                    <span className="text-2xl font-bold text-yellow-500">
+                                        Preview: {previewTimeLeft}s
+                                    </span>
+                                </div>
+
+                                <h2 className="text-2xl font-bold mb-6 dark:text-white">
+                                    {question.question}
+                                </h2>
+
+                                {question.image && (
+                                    <div className="flex justify-center mb-6">
+                                        <img
+                                            src={question.image}
+                                            alt="Question"
+                                            className="max-h-64 rounded-lg shadow-md"
+                                        />
+                                    </div>
+                                )}
+
+                                <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+                                    Showing question to players. Answers will appear in {previewTimeLeft} seconds...
+                                </p>
+
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 h-4 rounded-full mb-6">
+                                    <div
+                                        className="bg-yellow-500 h-4 rounded-full transition-all duration-1000"
+                                        style={{ width: `${(previewTimeLeft / question.previewTime) * 100}%` }}
+                                    ></div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mb-8 opacity-50">
+                                    {/* Use placeholders instead of trying to map over answers */}
+                                    {[0, 1, 2, 3].map((index) => (
+                                        <div
+                                            key={index}
+                                            className={`p-4 rounded-lg text-white font-medium ${index === 0 ? 'bg-red-500' :
+                                                    index === 1 ? 'bg-blue-500' :
+                                                        index === 2 ? 'bg-yellow-500' : 'bg-green-500'
+                                                } h-16 animate-pulse`}
+                                        >
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex justify-center">
+                                    <p className="text-indigo-600 dark:text-indigo-400 font-medium">
+                                        Players are reviewing the question
+                                    </p>
+                                </div>
+                            </motion.div>
                         )}
 
                         {gameState === 'results' && (
@@ -296,8 +388,8 @@ export default function HostQuiz() {
                                         onClick={startGame}
                                         disabled={players.length === 0}
                                         className={`w-full py-3 rounded-lg font-bold flex items-center justify-center ${players.length === 0
-                                                ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
-                                                : 'bg-green-600 hover:bg-green-700 text-white'
+                                            ? 'bg-gray-300 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
+                                            : 'bg-green-600 hover:bg-green-700 text-white'
                                             }`}
                                     >
                                         <FaPlay className="mr-2" />
@@ -372,75 +464,88 @@ export default function HostQuiz() {
                         </motion.div>
                     )}
 
-                    {gameState === 'question' && question && (
-                        <motion.div
-                            key="question"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
-                        >
-                            <div className="flex justify-between items-center mb-6">
-                                <span className="text-gray-600 dark:text-gray-400">
-                                    Question {question.questionIndex + 1} of {question.totalQuestions}
-                                </span>
-                                <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-                                    {timeLeft}s
-                                </span>
-                            </div>
-
-                            <h2 className="text-2xl font-bold mb-6 dark:text-white">
-                                {question.question}
-                            </h2>
-
-                            {question.image && (
-                                <div className="flex justify-center mb-6">
-                                    <img
-                                        src={question.image}
-                                        alt="Question"
-                                        className="max-h-64 rounded-lg shadow-md"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-2 gap-4 mb-8">
-                                {question.answers.map((answer, index) => (
-                                    <div
-                                        key={index}
-                                        className={`p-4 rounded-lg text-white font-medium ${index === 0 ? 'bg-red-500' :
-                                                index === 1 ? 'bg-blue-500' :
-                                                    index === 2 ? 'bg-yellow-500' : 'bg-green-500'
-                                            } ${index === question.solution ? 'ring-4 ring-gray-300 dark:ring-gray-600' : ''
-                                            }`}
-                                    >
-                                        {answer}
-                                        {index === question.solution && (
-                                            <div className="text-sm mt-1 font-normal">
-                                                ✓ Correct Answer
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center">
-                                    <FaUsers className="text-indigo-600 dark:text-indigo-400 mr-2" />
-                                    <span className="font-medium dark:text-white">
-                                        {players.length} players
-                                    </span>
-                                </div>
-
-                                <button
-                                    onClick={showResults}
-                                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium flex items-center"
-                                >
-                                    <FaChartBar className="mr-2" />
-                                    Show Results
-                                </button>
-                            </div>
-                        </motion.div>
-                    )}
+{gameState === 'question' && question && (
+  <motion.div
+    key="question"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
+  >
+    <div className="flex justify-between items-center mb-6">
+      <span className="text-gray-600 dark:text-gray-400">
+        Question {question.questionIndex + 1} of {question.totalQuestions}
+      </span>
+      <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+        {timeLeft}s
+      </span>
+    </div>
+    
+    <h2 className="text-2xl font-bold mb-6 dark:text-white">
+      {question.question}
+    </h2>
+    
+    {question.image && (
+      <div className="flex justify-center mb-6">
+        <img 
+          src={question.image} 
+          alt="Question" 
+          className="max-h-64 rounded-lg shadow-md" 
+        />
+      </div>
+    )}
+    
+    <div className="grid grid-cols-2 gap-4 mb-8">
+      {question.answers.map((answer, index) => (
+        <div
+          key={index}
+          className={`p-4 rounded-lg text-white font-medium ${
+            index === 0 ? 'bg-red-500' : 
+            index === 1 ? 'bg-blue-500' : 
+            index === 2 ? 'bg-yellow-500' : 'bg-green-500'
+          } ${
+            index === question.solution ? 'ring-4 ring-gray-300 dark:ring-gray-600' : ''
+          }`}
+        >
+          {answer}
+          {index === question.solution && (
+            <div className="text-sm mt-1 font-normal">
+              ✓ Correct Answer
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+    
+    <div className="flex justify-between items-center">
+      <div className="flex items-center">
+        <FaUsers className="text-indigo-600 dark:text-indigo-400 mr-2" />
+        <span className="font-medium dark:text-white">
+          {gameState.answers ? gameState.answers.length : 0} / {players.length} players answered
+        </span>
+      </div>
+      
+      {/* Add a pulsing effect when all players have answered */}
+      <button
+        onClick={showResults}
+        className={`px-4 py-2 text-white rounded-lg font-medium flex items-center ${
+          allPlayersAnswered ? 'bg-green-500 hover:bg-green-600 animate-pulse' : 'bg-yellow-500 hover:bg-yellow-600'
+        }`}
+      >
+        <FaChartBar className="mr-2" />
+        {allPlayersAnswered ? 'All Answered! Show Results' : 'Show Results'}
+      </button>
+    </div>
+    
+    {/* Progress bar */}
+    <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full mt-4">
+      <div 
+        className="bg-indigo-600 h-2 rounded-full transition-all duration-1000"
+        style={{ width: `${(timeLeft / question.time) * 100}%` }}
+      ></div>
+    </div>
+  </motion.div>
+)}
 
                     {gameState === 'results' && questionResults && (
                         <motion.div
@@ -469,9 +574,9 @@ export default function HostQuiz() {
                                         return (
                                             <div key={index} className="flex flex-col">
                                                 <div className={`p-3 rounded-t-lg text-white ${index === question.solution ? 'bg-green-600' :
-                                                        index === 0 ? 'bg-red-500' :
-                                                            index === 1 ? 'bg-blue-500' :
-                                                                index === 2 ? 'bg-yellow-500' : 'bg-green-500'
+                                                    index === 0 ? 'bg-red-500' :
+                                                        index === 1 ? 'bg-blue-500' :
+                                                            index === 2 ? 'bg-yellow-500' : 'bg-green-500'
                                                     }`}>
                                                     <div className="flex justify-between items-center">
                                                         <span>{answer}</span>

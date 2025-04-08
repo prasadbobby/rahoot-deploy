@@ -44,37 +44,49 @@ function sendQuestion(roomCode) {
   
   const question = gameState.quiz.questions[gameState.currentQuestion];
   
-  // Record when the question started for timing calculations
-  gameState.questionStartTime = Date.now();
-  
-  // Send to players (without the solution)
-  io.to(roomCode).emit("game:question", {
+  // First, send only the question for preview (without answers)
+  io.to(roomCode).emit("game:questionPreview", {
     questionIndex: gameState.currentQuestion,
     totalQuestions: gameState.quiz.questions.length,
     question: question.question,
-    answers: question.answers,
     image: question.image,
-    time: question.time
+    previewTime: 5 // 5 seconds preview time
   });
   
-  // Send to host (with the solution)
-  io.to(gameState.host).emit("host:question", {
-    questionIndex: gameState.currentQuestion,
-    totalQuestions: gameState.quiz.questions.length,
-    question: question.question,
-    answers: question.answers,
-    image: question.image,
-    time: question.time,
-    solution: question.solution
-  });
-  
-  // Auto-advance to results after time is up
+  // After 5 seconds, send the full question with answers and start the timer
   setTimeout(() => {
-    const currentGameState = gameStates[roomCode];
-    if (currentGameState && currentGameState.currentQuestion === gameState.currentQuestion) {
-      showResults(roomCode);
-    }
-  }, (question.time + 1) * 1000);
+    // Record when the actual answering period started for timing calculations
+    gameState.questionStartTime = Date.now();
+    
+    // Send to players (without the solution)
+    io.to(roomCode).emit("game:question", {
+      questionIndex: gameState.currentQuestion,
+      totalQuestions: gameState.quiz.questions.length,
+      question: question.question,
+      answers: question.answers,
+      image: question.image,
+      time: question.time
+    });
+    
+    // Send to host (with the solution)
+    io.to(gameState.host).emit("host:question", {
+      questionIndex: gameState.currentQuestion,
+      totalQuestions: gameState.quiz.questions.length,
+      question: question.question,
+      answers: question.answers,
+      image: question.image,
+      time: question.time,
+      solution: question.solution
+    });
+    
+    // Auto-advance to results after time is up
+    setTimeout(() => {
+      const currentGameState = gameStates[roomCode];
+      if (currentGameState && currentGameState.currentQuestion === gameState.currentQuestion) {
+        showResults(roomCode);
+      }
+    }, (question.time * 1000));
+  }, 5000); // 5 seconds delay
 }
 
 function showResults(roomCode) {
@@ -121,16 +133,25 @@ function showResults(roomCode) {
       .sort((a, b) => a.time - b.time)[0]
   });
   
-  // Send to all players
-  io.to(roomCode).emit("game:questionResults", {
-    solution: question.solution,
-    answerCounts,
-    totalAnswers: gameState.answers.length,
-    correctCount,
-    leaderboard: gameState.leaderboard
+  // Send to all players with their individual results
+  gameState.players.forEach(player => {
+    const playerAnswer = gameState.answers.find(a => a.playerId === player.id);
+    
+    io.to(player.id).emit("game:questionResults", {
+      solution: question.solution,
+      answerCounts,
+      totalAnswers: gameState.answers.length,
+      correctCount,
+      leaderboard: gameState.leaderboard,
+      playerResult: playerAnswer ? {
+        correct: playerAnswer.correct,
+        points: playerAnswer.points,
+        time: playerAnswer.time,
+        answer: playerAnswer.answer
+      } : null
+    });
   });
 }
-
 function endGame(roomCode) {
   const gameState = gameStates[roomCode];
   if (!gameState) return;
@@ -316,7 +337,6 @@ socket.on("host:startGame", (roomCode) => {
   }, 3000);
 });
 
-// Player submits an answer
 socket.on("player:submitAnswer", ({ roomCode, answer }) => {
   const gameState = gameStates[roomCode];
   
@@ -335,13 +355,10 @@ socket.on("player:submitAnswer", ({ roomCode, answer }) => {
   const question = gameState.quiz.questions[gameState.currentQuestion];
   const isCorrect = answer === question.solution;
   
-  // Calculate score based on time - faster answers get more points
-  // Calculate how many seconds passed since question started
+  // Calculate score based on time
   const now = Date.now();
   const elapsedSeconds = (now - gameState.questionStartTime) / 1000;
-  const timeRatio = 1 - (elapsedSeconds / question.time); // 1 at start, 0 at end
-  
-  // Points are max 1000 for immediate correct answer, decreasing over time
+  const timeRatio = 1 - (elapsedSeconds / question.time); 
   const points = isCorrect ? Math.round(1000 * Math.max(0, timeRatio)) : 0;
   
   gameState.answers.push({
@@ -352,11 +369,10 @@ socket.on("player:submitAnswer", ({ roomCode, answer }) => {
     time: elapsedSeconds
   });
   
-  player.score += points;
-  
-  socket.emit("player:answerResult", { 
-    correct: isCorrect,
-    points,
+  // Important change: Don't tell player if they're correct yet
+  // Instead, just confirm their answer was received
+  socket.emit("player:answerSubmitted", { 
+    answerIndex: answer,
     time: elapsedSeconds.toFixed(1)
   });
   
@@ -366,14 +382,39 @@ socket.on("player:submitAnswer", ({ roomCode, answer }) => {
     playersCount: gameState.players.length
   });
   
-  console.log(`Player ${player.username} answered question ${gameState.currentQuestion + 1} ${isCorrect ? 'correctly' : 'incorrectly'} in ${elapsedSeconds.toFixed(1)}s - ${points} points`);
+  console.log(`Player ${player.username} answered question ${gameState.currentQuestion + 1} in ${elapsedSeconds.toFixed(1)}s`);
   
-  // If all players answered, show results
+  // If all players answered, notify the host but don't automatically show results
   if (gameState.answers.length === gameState.players.length) {
-    console.log(`All players answered in room ${roomCode}, showing results`);
-    showResults(roomCode);
+    io.to(gameState.host).emit("host:allPlayersAnswered");
   }
 });
+
+// Modify the host:showResults handler
+socket.on("host:showResults", (roomCode) => {
+  const gameState = gameStates[roomCode];
+  
+  if (!gameState || gameState.host !== socket.id) {
+    return;
+  }
+  
+  console.log(`Host manually showing results in room ${roomCode}`);
+  
+  // This is when we update player scores
+  gameState.answers.forEach(answer => {
+    if (answer.correct) {
+      const player = gameState.players.find(p => p.id === answer.playerId);
+      if (player) {
+        player.score += answer.points;
+      }
+    }
+  });
+  
+  // Now show results to everyone
+  showResults(roomCode);
+});
+
+
 // Host manually shows results
 socket.on("host:showResults", (roomCode) => {
   const gameState = gameStates[roomCode];

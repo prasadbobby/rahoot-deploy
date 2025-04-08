@@ -6,7 +6,7 @@
       "name": "Prasad Bobby",
       "picture": "https://lh3.googleusercontent.com/a/ACg8ocI8yAoDYH5ig8GqDqbe1E9N5ngOpJIutuy27oEFD7CTz-KPIwYbTg=s96-c",
       "createdAt": "2025-04-07T14:48:44.799Z",
-      "lastLogin": "2025-04-08T04:24:20.783Z",
+      "lastLogin": "2025-04-08T04:36:55.793Z",
       "firstName": "Prasad",
       "lastName": "Bobby"
     },
@@ -148,6 +148,32 @@
       "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
       "quizTitle": "html",
       "date": "2025-04-08T01:17:09.840Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "id": "840d9b45-b7a8-4d20-ad93-3ce3cc2629c9",
+      "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "quizTitle": "html",
+      "date": "2025-04-08T04:40:47.361Z",
+      "players": []
+    },
+    {
+      "id": "792de79e-fd34-4ba1-aaad-da3d7c5fbeab",
+      "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "quizTitle": "html",
+      "date": "2025-04-08T05:18:03.058Z",
+      "players": []
+    },
+    {
+      "id": "9f3332fe-d61c-4f08-a474-65d1dacbf32c",
+      "quizId": "a1258597-a361-4f7a-9768-a6b2a147e1ee",
+      "quizTitle": "html",
+      "date": "2025-04-08T05:19:00.477Z",
       "players": [
         {
           "username": "Bobby",
