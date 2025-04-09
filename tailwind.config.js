@@ -10,17 +10,21 @@ module.exports = {
       colors: {
         brand: {
           red: '#FF3366',
-          blue: '#00CCFF',
+          orange: '#FF7F00',
           yellow: '#FFD166',
+          purple: '#9900CC',
+          blue: '#00CCFF',
+          cyan: '#00FFFF',
           green: '#06D6A0',
-          error: '#EF476F',
-          light: '#F0F4F8',
           dark: '#1A1B25',
-          card: '#FFFFFF',
           'dark-card': '#252836',
-          gray: '#A0AEC0',
-          'dark-gray': '#4A5568',
+          light: '#F0F4F8',
+          card: '#FFFFFF',
         }
+      },
+      backgroundImage: {
+        'gradient-game': 'linear-gradient(to right, #FF3366, #FF7F00)',
+        'gradient-eye': 'linear-gradient(to bottom, #FF3366, #9900CC)',
       },
       scale: {
         '102': '1.02',
@@ -30,6 +34,7 @@ module.exports = {
         display: ['Poppins', 'sans-serif'],
       },
       animation: {
+        'bounce-short': 'bounce 1s ease-in-out 2',
         'bounce-slow': 'bounce 3s infinite',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'spin-slow': 'spin 3s linear infinite',
@@ -40,6 +45,9 @@ module.exports = {
         wiggle: 'wiggle 1s ease-in-out infinite',
         slide: 'slide 30s linear infinite',
         'slide-slow': 'slide 60s linear infinite',
+        'slide-in-top': 'slide-in-top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+        'slide-in-bottom': 'slide-in-bottom 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+        'fade-in': 'fade-in 0.5s ease-in-out forwards',
       },
       keyframes: {
         float: {
@@ -87,8 +95,38 @@ module.exports = {
             opacity: '1',
             transform: 'translateY(0)'
           },
+        },
+        'slide-in-top': {
+          '0%': {
+            transform: 'translateY(-20px)',
+            opacity: '0'
+          },
+          '100%': {
+            transform: 'translateY(0)',
+            opacity: '1'
+          }
+        },
+        'slide-in-bottom': {
+          '0%': {
+            transform: 'translateY(20px)',
+            opacity: '0'
+          },
+          '100%': {
+            transform: 'translateY(0)',
+            opacity: '1'
+          }
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
         }
       },
+      boxShadow: {
+        'inset': 'inset 0 -4px 0 rgba(0, 0, 0, 0.15)',
+        'glow-red': '0 0 15px rgba(255, 51, 102, 0.5)',
+        'glow-blue': '0 0 15px rgba(0, 204, 255, 0.5)',
+        'glow-flame': '0 0 15px rgba(255, 51, 102, 0.5), 0 0 30px rgba(255, 51, 102, 0.3)'
+      }
     },
   },
   plugins: [

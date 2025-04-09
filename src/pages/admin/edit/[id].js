@@ -135,26 +135,41 @@ export default function EditQuiz() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold dark:text-white">Edit Quiz</h1>
-        <button
-          onClick={handleUpdateQuiz}
-          disabled={saving}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md flex items-center"
-        >
-          {saving ? (
-            <span className="flex items-center">
-              <div className="animate-spin mr-2 h-5 w-5 border-t-2 border-b-2 border-white rounded-full"></div>
-              Saving...
-            </span>
-          ) : (
-            <>
-              <FaSave className="mr-2" />
-              Save Changes
-            </>
-          )}
-        </button>
-      </div>
+      <div className="sticky top-24 z-10 bg-white dark:bg-brand-dark py-4 mb-4 border-b border-gray-200 dark:border-gray-700">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+    <div className="flex items-center">
+      <button
+        onClick={() => router.push('/admin')}
+        className="mr-4 text-gray-600 dark:text-gray-400 hover:text-brand-red dark:hover:text-brand-red transition-colors p-2 rounded-full bg-gray-100 dark:bg-gray-800"
+        aria-label="Back to dashboard"
+      >
+        <FaArrowLeft className="h-5 w-5" />
+      </button>
+      <h1 className="text-3xl font-bold">Edit Quiz</h1>
+    </div>
+    
+    <button
+      onClick={handleUpdateQuiz}
+      disabled={saving}
+      className="btn-primary"
+    >
+      {saving ? (
+        <span className="flex items-center">
+          <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Saving...
+        </span>
+      ) : (
+        <>
+          <FaSave className="mr-2" />
+          Save Changes
+        </>
+      )}
+    </button>
+  </div>
+</div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

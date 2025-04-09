@@ -6,7 +6,7 @@
       "name": "Prasad Bobby",
       "picture": "https://lh3.googleusercontent.com/a/ACg8ocI8yAoDYH5ig8GqDqbe1E9N5ngOpJIutuy27oEFD7CTz-KPIwYbTg=s96-c",
       "createdAt": "2025-04-07T14:48:44.799Z",
-      "lastLogin": "2025-04-08T17:53:08.705Z",
+      "lastLogin": "2025-04-08T18:55:26.435Z",
       "firstName": "Prasad",
       "lastName": "Bobby"
     },
@@ -26,6 +26,25 @@
       "picture": "https://lh3.googleusercontent.com/a/ACg8ocJ_1C00N1ultt5BaMyssWI31S16fu3QBTnsJrTwgphI1d8cgA=s96-c",
       "createdAt": "2025-04-07T17:07:47.120Z",
       "lastLogin": "2025-04-07T17:07:47.120Z"
+    },
+    {
+      "id": "109382179991278919589",
+      "email": "sowjanya7544@gmail.com",
+      "name": "Badugu Sowjanya",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocKjYZUeR_zM8bpsu5sxbKyqQOuiGV4DOit_TGDJnKwAMxExz7w=s96-c",
+      "firstName": "Badugu",
+      "lastName": "Sowjanya",
+      "createdAt": "2025-04-08T19:01:30.775Z",
+      "lastLogin": "2025-04-08T19:01:30.775Z"
+    },
+    {
+      "id": "100739114645182246084",
+      "email": "deshaditya7@gmail.com",
+      "name": "desh-aditya",
+      "picture": "https://lh3.googleusercontent.com/a/ACg8ocKvYSMmxaSRoR6-fB9-LqxhIgQKoeRlTMqM3_haKzt9tYl5Ew=s96-c",
+      "firstName": "desh-aditya",
+      "createdAt": "2025-04-08T19:03:08.380Z",
+      "lastLogin": "2025-04-08T19:03:08.380Z"
     }
   ],
   "quizzes": [
@@ -88,6 +107,79 @@
       ],
       "createdBy": "116911493717729573933",
       "createdAt": "2025-04-08T05:46:57.293Z"
+    },
+    {
+      "id": "5c839db7-6ed7-4330-9b20-a3606f7a71ea",
+      "code": "273863",
+      "title": "Test quiz",
+      "subject": "java",
+      "questions": [
+        {
+          "question": "what is test",
+          "answers": [
+            "t",
+            "tt",
+            "test",
+            "te"
+          ],
+          "solution": 2,
+          "image": "",
+          "time": 15,
+          "cooldown": 5
+        },
+        {
+          "question": "what is t",
+          "answers": [
+            "T",
+            "h",
+            "s",
+            "a"
+          ],
+          "solution": 0,
+          "image": "",
+          "time": 15,
+          "cooldown": 5
+        }
+      ],
+      "createdBy": "116911493717729573933",
+      "createdAt": "2025-04-08T18:18:16.597Z"
+    },
+    {
+      "id": "9a98d6c9-7587-4cfa-8094-120b9862a3df",
+      "code": "128568",
+      "title": "HTML topics",
+      "subject": "html",
+      "questions": [
+        {
+          "question": "what is html",
+          "answers": [
+            "hyper text markup language",
+            "hyper test markup language",
+            "hydro text multi language",
+            "hydro test multilevel language"
+          ],
+          "solution": 0,
+          "image": "",
+          "time": 15,
+          "cooldown": 5
+        },
+        {
+          "question": "what is css",
+          "answers": [
+            "cascade style data",
+            "cascade style sheet",
+            "current style data",
+            "cascade input language"
+          ],
+          "solution": 0,
+          "image": "",
+          "time": 15,
+          "cooldown": 5
+        }
+      ],
+      "createdBy": "116911493717729573933",
+      "createdAt": "2025-04-08T18:59:21.379Z",
+      "updatedAt": "2025-04-08T19:02:29.566Z"
     }
   ],
   "results": [
@@ -250,6 +342,113 @@
         {
           "username": "Bobby",
           "score": 483
+        }
+      ]
+    },
+    {
+      "id": "5a82739f-b735-498e-9cf3-a48d544c91ef",
+      "quizId": "5c839db7-6ed7-4330-9b20-a3606f7a71ea",
+      "quizTitle": "Test quiz",
+      "date": "2025-04-08T18:22:09.951Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "id": "4134f2eb-fa3e-421b-b849-429f281e528e",
+      "quizId": "5c839db7-6ed7-4330-9b20-a3606f7a71ea",
+      "quizTitle": "Test quiz",
+      "date": "2025-04-08T18:39:01.763Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "id": "8da6c701-0a72-4a06-8043-30142f085fd2",
+      "quizId": "5c839db7-6ed7-4330-9b20-a3606f7a71ea",
+      "quizTitle": "Test quiz",
+      "date": "2025-04-08T18:40:24.694Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 1156
+        }
+      ]
+    },
+    {
+      "id": "f81c6510-2d57-48bb-92b8-26e1d25ecc15",
+      "quizId": "5c839db7-6ed7-4330-9b20-a3606f7a71ea",
+      "quizTitle": "Test quiz",
+      "date": "2025-04-08T18:43:14.718Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 1255
+        }
+      ]
+    },
+    {
+      "id": "f5aa5155-f1d3-463d-8220-374cf1136ad0",
+      "quizId": "9a98d6c9-7587-4cfa-8094-120b9862a3df",
+      "quizTitle": "HTML topics",
+      "quizSubject": "html",
+      "date": "2025-04-08T19:33:36.690Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 673
+        }
+      ]
+    },
+    {
+      "id": "aca0beed-4d71-4918-a9bb-fa293a1b6381",
+      "quizId": "9a98d6c9-7587-4cfa-8094-120b9862a3df",
+      "quizTitle": "HTML topics",
+      "quizSubject": "html",
+      "date": "2025-04-08T19:35:16.349Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "score": 1475
+        }
+      ]
+    },
+    {
+      "id": "1d22f765-c72c-4527-b078-8befc9143ef6",
+      "quizId": "9a98d6c9-7587-4cfa-8094-120b9862a3df",
+      "quizTitle": "HTML topics",
+      "quizSubject": "html",
+      "date": "2025-04-08T19:53:16.052Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "userId": "116724717905662795487",
+          "score": 0
+        }
+      ]
+    },
+    {
+      "id": "36ed84cc-7ceb-40b8-adcb-3b8394b76eec",
+      "quizId": "9a98d6c9-7587-4cfa-8094-120b9862a3df",
+      "quizTitle": "HTML topics",
+      "quizSubject": "html",
+      "date": "2025-04-08T19:54:48.567Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "userId": "Bobby",
+          "score": 1635
+        },
+        {
+          "username": "Bobby",
+          "userId": "116724717905662795487",
+          "score": 0
         }
       ]
     }

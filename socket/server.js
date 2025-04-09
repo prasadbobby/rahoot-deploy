@@ -157,12 +157,16 @@ function endGame(roomCode) {
   if (!gameState) return;
   
   // Sort players by score
-  const finalLeaderboard = gameState.players
-    .sort((a, b) => b.score - a.score);
+  const finalLeaderboard = [...gameState.players].sort((a, b) => (b.score || 0) - (a.score || 0));
   
   // Send final results
   io.to(roomCode).emit("game:end", {
-    leaderboard: finalLeaderboard
+    leaderboard: finalLeaderboard.map(player => ({
+      id: player.id,
+      username: player.username,
+      score: player.score || 0,
+      userId: player.userId || player.username
+    }))
   });
   
   // Save results to data.json
@@ -175,25 +179,22 @@ function endGame(roomCode) {
       id: uuidv4(),
       quizId: gameState.quiz.id,
       quizTitle: gameState.quiz.title,
+      quizSubject: gameState.quiz.subject || '',
       date: new Date().toISOString(),
       players: finalLeaderboard.map(p => ({
         username: p.username,
-        score: p.score
+        userId: p.userId || p.username, // Ensure there's a user identifier
+        score: p.score || 0
       }))
     };
     
     data.results.push(gameResult);
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+    console.log(`Game results saved with ${finalLeaderboard.length} players`);
   } catch (error) {
     console.error("Error saving game results:", error);
   }
-  
-  // Clean up game state after a delay
-  setTimeout(() => {
-    delete gameStates[roomCode];
-  }, 60000); // Keep game state for 1 minute for late viewers
 }
-
 // Socket connection handler
 io.on("connection", (socket) => {
   console.log(`A user connected ${socket.id}`);
@@ -258,7 +259,7 @@ io.on("connection", (socket) => {
   });
 
 // socket/server.js (continued)
-socket.on("player:join", ({username, roomCode}) => {
+socket.on("player:join", ({username, roomCode, userId}) => {
   console.log(`Player ${username} trying to join room: ${roomCode}`);
   const gameState = gameStates[roomCode];
   
@@ -288,6 +289,15 @@ socket.on("player:join", ({username, roomCode}) => {
   
   gameState.players.push(player);
   socket.join(roomCode);
+
+  let playerData = {
+    username: username,
+    room: roomCode,
+    id: socket.id,
+    userId: userId || username, // Use username as fallback if no userId
+    score: 0
+  };
+  gameState.players.push(playerData);
   
   socket.emit("player:joined", { 
     roomCode,
@@ -337,57 +347,51 @@ socket.on("host:startGame", (roomCode) => {
   }, 3000);
 });
 
+// In the player:submitAnswer handler
 socket.on("player:submitAnswer", ({ roomCode, answer }) => {
   const gameState = gameStates[roomCode];
   
-  if (!gameState || !gameState.started) {
-    return;
-  }
+  if (!gameState || !gameState.started) return;
   
   const player = gameState.players.find(p => p.id === socket.id);
-  if (!player) return;
-  
-  if (gameState.answers.some(a => a.playerId === socket.id)) {
-    console.log(`Player ${player.username} already submitted answer`);
-    return;
-  }
+  if (!player || gameState.answers.some(a => a.playerId === socket.id)) return;
   
   const question = gameState.quiz.questions[gameState.currentQuestion];
   const isCorrect = answer === question.solution;
   
-  // Calculate score based on time
+  // Calculate score based on time (1000 points max for instant answer)
   const now = Date.now();
   const elapsedSeconds = (now - gameState.questionStartTime) / 1000;
-  const timeRatio = 1 - (elapsedSeconds / question.time); 
-  const points = isCorrect ? Math.round(1000 * Math.max(0, timeRatio)) : 0;
+  const timeRatio = Math.max(0, 1 - (elapsedSeconds / question.time));
+  const points = isCorrect ? Math.round(1000 * timeRatio) : 0;
+  
+  console.log(`Player ${player.username} scored ${points} points`);
+  
+  // IMPORTANT: Update player's cumulative score
+  player.score = (player.score || 0) + points;
   
   gameState.answers.push({
     playerId: socket.id,
     answer,
     correct: isCorrect,
     points,
-    time: elapsedSeconds
+    time: elapsedSeconds,
+    userId: player.userId // Store user ID for persistence
   });
   
-  // Important change: Don't tell player if they're correct yet
-  // Instead, just confirm their answer was received
   socket.emit("player:answerSubmitted", { 
     answerIndex: answer,
-    time: elapsedSeconds.toFixed(1)
+    time: elapsedSeconds.toFixed(1),
+    points: points,
+    totalScore: player.score
   });
   
   io.to(gameState.host).emit("host:playerAnswered", {
     playerId: socket.id,
+    username: player.username,
     answersCount: gameState.answers.length,
     playersCount: gameState.players.length
   });
-  
-  console.log(`Player ${player.username} answered question ${gameState.currentQuestion + 1} in ${elapsedSeconds.toFixed(1)}s`);
-  
-  // If all players answered, notify the host but don't automatically show results
-  if (gameState.answers.length === gameState.players.length) {
-    io.to(gameState.host).emit("host:allPlayersAnswered");
-  }
 });
 
 // Modify the host:showResults handler

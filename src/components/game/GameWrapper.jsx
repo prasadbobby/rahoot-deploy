@@ -5,6 +5,8 @@ import { usePlayerContext } from "@/context/player"
 import { useSocketContext } from "@/context/socket"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/router"
+import { motion } from "framer-motion"
+import { FaHome, FaArrowRight } from "react-icons/fa"
 
 export default function GameWrapper({ children, textNext, onNext, manager }) {
   const { socket } = useSocketContext()
@@ -37,9 +39,9 @@ export default function GameWrapper({ children, textNext, onNext, manager }) {
 
   return (
     <section className="relative flex min-h-screen w-full flex-col justify-between">
-      <div className="fixed left-0 top-0 -z-10 h-full w-full bg-orange-600 opacity-70">
+      <div className="fixed left-0 top-0 -z-10 h-full w-full bg-gradient-to-br from-brand-dark to-gray-900 opacity-95">
         <Image
-          className="pointer-events-none h-full w-full object-cover opacity-60"
+          className="pointer-events-none h-full w-full object-cover opacity-10 blend-overlay"
           src={background}
           alt="background"
         />
@@ -47,17 +49,21 @@ export default function GameWrapper({ children, textNext, onNext, manager }) {
 
       <div className="flex w-full justify-between p-4">
         {questionState && (
-          <div className="shadow-inset flex items-center rounded-md bg-white p-2 px-4 text-lg font-bold text-black">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="shadow-inset flex items-center rounded-md bg-gradient-to-r from-brand-red to-brand-blue p-2 px-4 text-lg font-bold text-white"
+          >
             {`${questionState.current} / ${questionState.total}`}
-          </div>
+          </motion.div>
         )}
 
         {manager && (
           <Button
-            className="self-end bg-white px-4 !text-black"
+            className="self-end bg-white px-4 !text-brand-red hover:bg-white/90 transition-colors"
             onClick={() => onNext()}
           >
-            {textNext}
+            {textNext} <FaArrowRight className="ml-2" />
           </Button>
         )}
       </div>
@@ -65,9 +71,9 @@ export default function GameWrapper({ children, textNext, onNext, manager }) {
       {children}
 
       {!manager && (
-        <div className="z-50 flex items-center justify-between bg-white px-4 py-2 text-lg font-bold text-white">
-          <p className="text-gray-800">{!!player && player.username}</p>
-          <div className="rounded-sm bg-gray-800 px-3 py-1 text-lg">
+        <div className="z-50 flex items-center justify-between bg-white dark:bg-gray-800 px-4 py-2 text-lg font-bold shadow-lg">
+          <p className="text-gray-800 dark:text-white">{!!player && player.username}</p>
+          <div className="rounded-md bg-gradient-to-r from-brand-red to-brand-blue px-3 py-1 text-lg text-white">
             {!!player && player.points}
           </div>
         </div>

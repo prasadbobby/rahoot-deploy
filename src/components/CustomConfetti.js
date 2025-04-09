@@ -56,8 +56,8 @@ export default function CustomConfetti({ active }) {
             width: `${particle.size}px`,
             height: `${particle.size}px`,
             backgroundColor: particle.color,
-            animationDuration: `${particle.speed}s`,
-            animationDelay: `${particle.delay}s`,
+            '--fall-duration': `${particle.speed}s`,
+            '--fall-delay': `${particle.delay}s`,
             transform: `rotate(${particle.rotation}deg)`,
           }}
         />

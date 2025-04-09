@@ -7,7 +7,8 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaPlay, FaClock, FaTrophy, FaArrowRight, FaCheck,
-  FaTimes, FaHourglassHalf, FaUserAlt, FaCode
+  FaTimes, FaHourglassHalf, FaUserAlt, FaCode, FaHome,
+  FaBolt, FaExclamationCircle, FaMusic, FaVolumeUp, FaVolumeMute
 } from 'react-icons/fa';
 
 export default function PlayQuiz() {
@@ -29,6 +30,7 @@ export default function PlayQuiz() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [previewTimeLeft, setPreviewTimeLeft] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   // Load quiz data
   useEffect(() => {
@@ -55,14 +57,18 @@ export default function PlayQuiz() {
 
   // Join game when quiz is loaded
   useEffect(() => {
-    if (!socket || !roomCode || !username) return;
-
+    if (!socket || !roomCode || !username || !user) return;
+  
     // Check if room exists
     socket.emit('player:checkRoom', roomCode);
-
+  
     socket.on('player:roomValid', (code) => {
-      // Join the room
-      socket.emit('player:join', { username, roomCode: code });
+      // Join the room with user identification
+      socket.emit('player:join', { 
+        username, 
+        roomCode: code,
+        userId: user.id || user.email || username // Pass user ID for tracking
+      });
     });
 
     socket.on('player:joined', (data) => {
@@ -202,7 +208,7 @@ export default function PlayQuiz() {
 
   if (loading) {
     return (
-      <div className="pt-28 flex justify-center items-center h-[calc(100vh-7rem)]">
+      <div className="quiz-container flex justify-center items-center min-h-[80vh]">
         <div className="text-center">
           <div className="relative animate-spin w-20 h-20 mx-auto mb-4">
             <div className="absolute inset-0 rounded-full border-4 border-t-brand-red border-b-brand-blue border-l-brand-yellow border-r-brand-green"></div>
@@ -216,8 +222,7 @@ export default function PlayQuiz() {
   }
 
   return (
-    <div className="pt-24 pb-12 min-h-screen">
-
+    <div className="quiz-container min-h-screen">
       {/* Game Header */}
       <header className="fixed top-16 left-0 right-0 z-30 bg-white dark:bg-brand-dark-card shadow-md py-2">
         <div className="max-w-3xl mx-auto px-4 flex justify-between items-center">
@@ -240,6 +245,13 @@ export default function PlayQuiz() {
           </div>
 
           <div className="flex items-center">
+            <button 
+              onClick={() => setMuted(!muted)}
+              className="mr-3 p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+              aria-label={muted ? "Unmute" : "Mute"}
+            >
+              {muted ? <FaVolumeMute className="h-4 w-4" /> : <FaVolumeUp className="h-4 w-4" />}
+              </button>
             <div className="flex items-center mr-3">
               <div className="h-8 w-8 rounded-full bg-brand-blue flex items-center justify-center text-white">
                 <FaUserAlt className="h-4 w-4" />
@@ -271,8 +283,8 @@ export default function PlayQuiz() {
                   '#FF3366', '#00CCFF', '#FFD166', '#06D6A0',
                   '#EF476F', '#118AB2', '#FFD166', '#06D6A0'
                 ][Math.floor(Math.random() * 8)],
-                animationDuration: `${2 + Math.random() * 5}s`,
-                animationDelay: `${Math.random() * 5}s`,
+                '--fall-duration': `${2 + Math.random() * 5}s`,
+                '--fall-delay': `${Math.random() * 5}s`,
                 transform: `rotate(${Math.random() * 360}deg)`,
               }}
             />
@@ -514,53 +526,54 @@ export default function PlayQuiz() {
         )}
 
 
-        {gameState === 'waiting' && selectedAnswer !== null && (
-          <motion.div
-            key="waiting-answered"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center min-h-[calc(100vh-7rem)] p-6 max-w-md mx-auto pt-20"
+
+{gameState === 'waiting' && selectedAnswer !== null && (
+  <motion.div
+    key="waiting-answered"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="flex flex-col items-center justify-center min-h-[calc(100vh-7rem)] p-6 max-w-md mx-auto pt-20"
+  >
+    <div className="card w-full text-center">
+      <div className="mx-auto w-24 h-24 bg-brand-blue/10 dark:bg-brand-blue/5 rounded-full flex items-center justify-center mb-6 relative">
+        <div className="absolute inset-0 rounded-full border-4 border-brand-blue/30 border-t-brand-blue animate-spin"></div>
+        <FaHourglassHalf className="w-10 h-10 text-brand-blue" />
+      </div>
+
+      <h2 className="text-2xl font-bold mb-4">
+        Answer Recorded!
+      </h2>
+
+      <p className="text-gray-600 dark:text-gray-400 mb-6">
+        Waiting for all players to answer... Results will be shown shortly!
+      </p>
+
+      <div className="game-grid mb-2">
+        {question.answers.map((answer, index) => (
+          <div
+            key={index}
+            className={`answer-box ${selectedAnswer === index
+                ? `${index === 0 ? 'answer-box-red' :
+                  index === 1 ? 'answer-box-blue' :
+                    index === 2 ? 'answer-box-yellow' : 'answer-box-green'} ring-4 ring-white dark:ring-gray-800`
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+              }`}
           >
-            <div className="card w-full text-center">
-              <div className="mx-auto w-24 h-24 bg-brand-blue/10 dark:bg-brand-blue/5 rounded-full flex items-center justify-center mb-6 relative">
-                <div className="absolute inset-0 rounded-full border-4 border-brand-blue/30 border-t-brand-blue animate-spin"></div>
-                <FaHourglassHalf className="w-10 h-10 text-brand-blue" />
-              </div>
+            {answer}
+          </div>
+        ))}
+      </div>
 
-              <h2 className="text-2xl font-bold mb-4">
-                Answer Submitted!
-              </h2>
-
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Waiting for other players and results...
-              </p>
-
-              <div className="game-grid mb-2">
-                {question.answers.map((answer, index) => (
-                  <div
-                    key={index}
-                    className={`answer-box ${selectedAnswer === index
-                        ? `${index === 0 ? 'answer-box-red' :
-                          index === 1 ? 'answer-box-blue' :
-                            index === 2 ? 'answer-box-yellow' : 'answer-box-green'} ring-4 ring-white dark:ring-gray-800`
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
-                      }`}
-                  >
-                    {answer}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 inline-block">
-                <div className="badge badge-primary animate-pulse flex items-center">
-                  <span className="inline-block h-2 w-2 rounded-full bg-current mr-2 animate-ping"></span>
-                  Waiting for results...
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
+      <div className="mt-6 inline-block">
+        <div className="badge badge-primary animate-pulse flex items-center">
+          <span className="inline-block h-2 w-2 rounded-full bg-current mr-2 animate-ping"></span>
+          Results coming soon...
+        </div>
+      </div>
+    </div>
+  </motion.div>
+)}
 
         {gameState === 'result' && result && (
           <motion.div
@@ -738,21 +751,21 @@ export default function PlayQuiz() {
 
                 {/* Your position */}
                 {leaderboard.find(p => p.id === socket.id) && (
-                  <div className="bg-brand-blue/10 dark:bg-brand-blue/5 border border-brand-blue/20 rounded-lg p-4">
-                    <p className="text-center text-gray-700 dark:text-gray-300 mb-2">Your Position</p>
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center font-bold mr-3">
-                        {leaderboard.findIndex(p => p.id === socket.id) + 1}
-                      </div>
-                      <div className="flex-grow font-medium">
-                        {leaderboard.find(p => p.id === socket.id).username} (You)
-                      </div>
-                      <div className="font-bold text-brand-blue">
-                        {leaderboard.find(p => p.id === socket.id).score}
-                      </div>
-                    </div>
-                  </div>
-                )}
+  <div className="bg-brand-blue/10 dark:bg-brand-blue/5 border border-brand-blue/20 rounded-lg p-4">
+    <p className="text-center text-gray-700 dark:text-gray-300 mb-2">Your Position</p>
+    <div className="flex items-center">
+      <div className="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center font-bold mr-3">
+        {leaderboard.findIndex(p => p.id === socket.id) + 1}
+      </div>
+      <div className="flex-grow font-medium">
+        {leaderboard.find(p => p.id === socket.id).username} (You)
+      </div>
+      <div className="font-bold text-brand-blue text-xl">
+        {leaderboard.find(p => p.id === socket.id).score || 0}
+      </div>
+    </div>
+  </div>
+)}
               </div>
 
               <button

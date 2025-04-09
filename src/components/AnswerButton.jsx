@@ -1,5 +1,4 @@
 import clsx from "clsx"
-import Triangle from "./icons/Triangle"
 
 export default function AnswerButton({
   className,
@@ -10,13 +9,13 @@ export default function AnswerButton({
   return (
     <button
       className={clsx(
-        "shadow-inset flex items-center gap-3 rounded px-4 py-6 text-left",
+        "shadow-inset flex items-center gap-3 rounded-xl px-4 py-6 text-left transition-all transform hover:scale-102 active:scale-98",
         className,
       )}
       {...otherProps}
     >
-      <Icon className="h-6 w-6" />
-      <span className="drop-shadow-md">{children}</span>
+      <Icon className="h-6 w-6 flex-shrink-0" />
+      <span className="drop-shadow-md font-medium text-lg">{children}</span>
     </button>
   )
 }

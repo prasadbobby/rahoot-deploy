@@ -6,10 +6,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FaUsers, FaPlay, FaStepForward, FaTrophy, FaChartBar, 
-  FaTimes, FaCopy, FaClock, FaCheckCircle, FaTimesCircle,
-  FaCircle, FaGamepad, FaChevronRight, FaUserPlus, FaHome,FaCheck
+import {
+    FaUsers, FaPlay, FaStepForward, FaTrophy, FaChartBar,
+    FaTimes, FaCopy, FaClock, FaCheckCircle, FaTimesCircle,
+    FaCircle, FaGamepad, FaChevronRight, FaUserPlus, FaHome, FaCheck
 } from 'react-icons/fa';
 import CustomConfetti from '@/components/CustomConfetti';
 
@@ -34,21 +34,10 @@ export default function HostQuiz() {
 
     useEffect(() => {
         if (!socket) return;
-
+      
         socket.on('game:questionPreview', (data) => {
-            setQuestion(data);
-            setPreviewTimeLeft(data.previewTime);
-            setGameState('preview');
-
-            const timer = setInterval(() => {
-                setPreviewTimeLeft((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(timer);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
+          setQuestion(data);
+          setGameState('preview');
         });
 
         return () => {
@@ -96,7 +85,7 @@ export default function HostQuiz() {
 
         socket.on('host:playerJoined', (player) => {
             setPlayers(prev => [...prev, player]);
-            toast(`${player.username} joined`, { 
+            toast(`${player.username} joined`, {
                 icon: '👋',
                 style: { borderRadius: '10px', background: '#333', color: '#fff' }
             });
@@ -163,7 +152,7 @@ export default function HostQuiz() {
         socket.on('error', (message) => {
             toast.error(message);
         });
-        
+
         socket.on('host:allPlayersAnswered', () => {
             setAllPlayersAnswered(true);
         });
@@ -236,7 +225,7 @@ export default function HostQuiz() {
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
                         You don't have permission to host quizzes.
                     </p>
-                    <button 
+                    <button
                         onClick={() => router.push('/dashboard')}
                         className="btn-primary w-full"
                     >
@@ -340,21 +329,20 @@ export default function HostQuiz() {
                             <div className="lg:col-span-3">
                                 <div className="card h-full flex flex-col">
                                     <div className="rounded-xl overflow-hidden mb-6">
-                                        <div className="bg-gradient-to-r from-brand-red to-brand-blue p-6 text-white text-center relative">
+                                        <div className="bg-gradient-to-r from-brand-red to-brand-orange p-6 text-white text-center relative">
                                             <h2 className="text-3xl font-bold mb-2">Waiting for Players</h2>
                                             <p className="text-white/80 text-lg">Share this code with your participants</p>
-                                            
-                                            {/* Animated shapes */}
+
                                             <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20 pointer-events-none">
                                                 <div className="absolute -top-4 -left-4 w-16 h-16 rounded-full bg-white animate-float"></div>
-                                                <div className="absolute top-10 right-10 w-20 h-20 rounded-full bg-white animate-float" style={{animationDelay: '1s'}}></div>
-                                                <div className="absolute bottom-5 left-1/4 w-12 h-12 rounded-full bg-white animate-float" style={{animationDelay: '0.5s'}}></div>
+                                                <div className="absolute top-10 right-10 w-20 h-20 rounded-full bg-white animate-float" style={{ animationDelay: '1s' }}></div>
+                                                <div className="absolute bottom-5 left-1/4 w-12 h-12 rounded-full bg-white animate-float" style={{ animationDelay: '0.5s' }}></div>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="flex items-center justify-center p-8 bg-brand-dark text-white">
                                             <div className="text-5xl md:text-6xl font-bold tracking-wider font-mono">{roomCode}</div>
-                                            <button 
+                                            <button
                                                 onClick={copyCodeToClipboard}
                                                 className="ml-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
                                                 aria-label="Copy code"
@@ -363,11 +351,11 @@ export default function HostQuiz() {
                                             </button>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="text-center p-6 flex-grow flex flex-col justify-center">
                                         <div className="text-6xl font-bold mb-6 text-gray-200 dark:text-gray-700">{players.length}</div>
                                         <p className="text-xl mb-8 text-gray-600 dark:text-gray-400">Players have joined</p>
-                                        
+
                                         <div className="relative">
                                             <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 border-t-2 border-dashed border-gray-200 dark:border-gray-700"></div>
                                             <div className="relative z-10 bg-white dark:bg-brand-dark-card inline-block px-4">
@@ -376,7 +364,7 @@ export default function HostQuiz() {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="p-4 border-t border-gray-100 dark:border-gray-800">
                                         <button
                                             onClick={startGame}
@@ -389,7 +377,7 @@ export default function HostQuiz() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {/* Player List */}
                             <div className="lg:col-span-2">
                                 <div className="card h-full flex flex-col">
@@ -402,7 +390,7 @@ export default function HostQuiz() {
                                             {players.length}
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex-grow p-4 overflow-y-auto max-h-[400px]">
                                         {players.length === 0 ? (
                                             <div className="flex flex-col items-center justify-center h-full text-center p-8">
@@ -465,41 +453,39 @@ export default function HostQuiz() {
                                             {timeLeft}s
                                         </div>
                                     </div>
-                                    
+
                                     <h2 className="text-2xl font-bold mb-6">
                                         {question.question}
                                     </h2>
-                                    
+
                                     {question.image && (
                                         <div className="flex justify-center mb-6">
-                                            <img 
-                                                src={question.image} 
-                                                alt="Question" 
-                                                className="max-h-64 rounded-lg shadow-md" 
+                                            <img
+                                                src={question.image}
+                                                alt="Question"
+                                                className="max-h-64 rounded-lg shadow-md"
                                             />
                                         </div>
                                     )}
-                                    
+
                                     <div className="mb-6">
                                         <div className="question-timer">
-                                            <div 
+                                            <div
                                                 className="timer-progress"
                                                 style={{ width: `${(timeLeft / question.time) * 100}%` }}
                                             ></div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-2 gap-4 mb-6">
                                         {question.answers.map((answer, index) => (
                                             <div
                                                 key={index}
-                                                className={`p-4 rounded-xl text-white font-medium flex items-center justify-between ${
-                                                    index === 0 ? 'bg-brand-red' : 
-                                                    index === 1 ? 'bg-brand-blue' : 
-                                                    index === 2 ? 'bg-brand-yellow text-gray-800' : 'bg-brand-green'
-                                                } ${
-                                                    index === question.solution ? 'ring-4 ring-white dark:ring-gray-800' : ''
-                                                }`}
+                                                className={`p-4 rounded-xl text-white font-medium flex items-center justify-between ${index === 0 ? 'bg-brand-red' :
+                                                        index === 1 ? 'bg-brand-blue' :
+                                                            index === 2 ? 'bg-brand-yellow text-gray-800' : 'bg-brand-green'
+                                                    } ${index === question.solution ? 'ring-4 ring-white dark:ring-gray-800' : ''
+                                                    }`}
                                             >
                                                 <span>{answer}</span>
                                                 {index === question.solution && (
@@ -510,7 +496,7 @@ export default function HostQuiz() {
                                             </div>
                                         ))}
                                     </div>
-                                    
+
                                     <div className="border-t border-gray-100 dark:border-gray-800 pt-4 flex justify-between items-center">
                                         <div>
                                             <p className="text-sm text-gray-500">Correct answer: {question.answers[question.solution]}</p>
@@ -525,7 +511,7 @@ export default function HostQuiz() {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {/* Player Status */}
                             <div className="lg:col-span-2">
                                 <div className="card h-full flex flex-col">
@@ -535,7 +521,7 @@ export default function HostQuiz() {
                                             Player Responses
                                         </h3>
                                     </div>
-                                    
+
                                     <div className="p-4 text-center flex flex-col items-center justify-center">
                                         <div className="text-3xl font-bold mb-2 flex items-baseline">
                                             <span className="text-brand-green">{players.filter(p => p.hasAnswered).length}</span>
@@ -543,20 +529,20 @@ export default function HostQuiz() {
                                             <span>{players.length}</span>
                                         </div>
                                         <p className="text-gray-500 dark:text-gray-400 mb-6">players have answered</p>
-                                        
+
                                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-6">
-                                            <div 
+                                            <div
                                                 className="bg-brand-green h-2.5 rounded-full transition-all duration-500"
                                                 style={{ width: `${players.length > 0 ? (players.filter(p => p.hasAnswered).length / players.length) * 100 : 0}%` }}
                                             ></div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex-grow p-4 overflow-y-auto">
                                         <div className="space-y-2">
                                             {players.map((player) => (
-                                                <div 
-                                                    key={player.id} 
+                                                <div
+                                                    key={player.id}
                                                     className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
                                                 >
                                                     <div className="flex items-center">
@@ -584,6 +570,56 @@ export default function HostQuiz() {
                         </motion.div>
                     )}
 
+{gameState === 'preview' && question && (
+  <motion.div
+    key="preview"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="card max-w-4xl mx-auto"
+  >
+    <div className="flex justify-between items-center mb-6">
+      <span className="badge badge-primary">
+        Question {question.questionIndex + 1} of {question.totalQuestions}
+      </span>
+      <div className="badge badge-secondary flex items-center">
+        <FaClock className="mr-1" />
+        Preview: {previewTimeLeft}s
+      </div>
+    </div>
+    
+    <h2 className="text-2xl font-bold mb-6 text-center">
+      {question.question}
+    </h2>
+
+    {question.image && (
+      <div className="mb-6 flex justify-center">
+        <img
+          src={question.image}
+          alt="Question"
+          className="max-h-64 rounded-lg shadow-md"
+        />
+      </div>
+    )}
+
+    <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
+      <p className="text-lg text-gray-600 dark:text-gray-400">
+        Players are currently previewing the question
+      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-500">
+        Answer options will appear soon
+      </p>
+    </div>
+
+    <div className="question-timer mb-4">
+      <div
+        className="timer-progress bg-brand-yellow"
+        style={{ width: `${(previewTimeLeft / question.previewTime) * 100}%` }}
+      ></div>
+    </div>
+  </motion.div>
+)}
+
                     {gameState === 'results' && questionResults && (
                         <motion.div
                             key="results"
@@ -598,20 +634,20 @@ export default function HostQuiz() {
                                     <FaChartBar className="mr-2 text-brand-blue" />
                                     Results
                                 </h2>
-                                
+
                                 <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                                     <div className="flex justify-between items-center mb-2">
                                         <div className="text-sm text-gray-500">Correct Answers</div>
                                         <div className="font-bold text-brand-green">{questionResults.correctCount} / {questionResults.totalAnswers}</div>
                                     </div>
                                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                        <div 
+                                        <div
                                             className="bg-brand-green h-2.5 rounded-full"
                                             style={{ width: `${questionResults.totalAnswers > 0 ? (questionResults.correctCount / questionResults.totalAnswers) * 100 : 0}%` }}
                                         ></div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="grid grid-cols-2 gap-6 mb-8">
                                     {question.answers.map((answer, index) => {
                                         const count = questionResults.answerCounts[index] || 0;
@@ -621,9 +657,9 @@ export default function HostQuiz() {
                                             <div key={index} className="flex flex-col">
                                                 <div className={`p-3 rounded-t-lg text-white ${index === question.solution ? 'bg-brand-green' :
                                                     index === 0 ? 'bg-brand-red' :
-                                                    index === 1 ? 'bg-brand-blue' :
-                                                    index === 2 ? 'bg-brand-yellow text-gray-800' : 'bg-brand-green'
-                                                }`}>
+                                                        index === 1 ? 'bg-brand-blue' :
+                                                            index === 2 ? 'bg-brand-yellow text-gray-800' : 'bg-brand-green'
+                                                    }`}>
                                                     <div className="flex justify-between items-center">
                                                         <span>{answer}</span>
                                                         {index === question.solution && (
@@ -648,7 +684,7 @@ export default function HostQuiz() {
                                         );
                                     })}
                                 </div>
-                                
+
                                 <div className="border-t border-gray-100 dark:border-gray-800 pt-4 flex justify-end">
                                     <button
                                         onClick={nextQuestion}
@@ -659,7 +695,7 @@ export default function HostQuiz() {
                                     </button>
                                 </div>
                             </div>
-                            
+
                             {/* Leaderboard */}
                             <div className="card">
                                 <div className="flex justify-between items-center mb-6">
@@ -671,33 +707,31 @@ export default function HostQuiz() {
                                         {leaderboard.length} Players
                                     </div>
                                 </div>
-                                
+
                                 <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2">
                                     {leaderboard.map((player, index) => (
                                         <div
                                             key={player.id}
-                                            className={`flex items-center p-4 rounded-xl ${
-                                                index === 0 ? 'bg-brand-yellow/10 border border-brand-yellow/20' :
-                                                index === 1 ? 'bg-gray-100 dark:bg-gray-800' :
-                                                index === 2 ? 'bg-amber-700/10 border border-amber-700/20' :
-                                                'bg-gray-50 dark:bg-gray-800/50'
-                                            } transition-all`}
+                                            className={`flex items-center p-4 rounded-xl ${index === 0 ? 'bg-brand-yellow/10 border border-brand-yellow/20' :
+                                                    index === 1 ? 'bg-gray-100 dark:bg-gray-800' :
+                                                        index === 2 ? 'bg-amber-700/10 border border-amber-700/20' :
+                                                            'bg-gray-50 dark:bg-gray-800/50'
+                                                } transition-all`}
                                         >
-                                            <div className={`flex items-center justify-center h-10 w-10 rounded-full font-bold mr-4 ${
-                                                index === 0 ? 'bg-brand-yellow text-gray-800' :
-                                                index === 1 ? 'bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white' :
-                                                index === 2 ? 'bg-amber-700 text-white' :
-                                                'bg-brand-blue/10 text-brand-blue'
-                                            }`}>
+                                            <div className={`flex items-center justify-center h-10 w-10 rounded-full font-bold mr-4 ${index === 0 ? 'bg-brand-yellow text-gray-800' :
+                                                    index === 1 ? 'bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white' :
+                                                        index === 2 ? 'bg-amber-700 text-white' :
+                                                            'bg-brand-blue/10 text-brand-blue'
+                                                }`}>
                                                 {index + 1}
                                             </div>
                                             <div className="flex-grow">
                                                 <div className="font-bold">{player.username}</div>
                                                 <div className="text-sm text-gray-500">
-                                                    {index === 0 ? '1st Place' : 
-                                                     index === 1 ? '2nd Place' : 
-                                                     index === 2 ? '3rd Place' : 
-                                                     `${index + 1}th Place`}
+                                                    {index === 0 ? '1st Place' :
+                                                        index === 1 ? '2nd Place' :
+                                                            index === 2 ? '3rd Place' :
+                                                                `${index + 1}th Place`}
                                                 </div>
                                             </div>
                                             <div className="text-2xl font-bold text-brand-blue">
@@ -705,7 +739,7 @@ export default function HostQuiz() {
                                             </div>
                                         </div>
                                     ))}
-                                    
+
                                     {leaderboard.length === 0 && (
                                         <div className="text-center py-10 text-gray-500 dark:text-gray-400">
                                             No players have scored yet
@@ -728,7 +762,7 @@ export default function HostQuiz() {
                                 <FaTrophy className="text-brand-yellow mr-3" />
                                 Game Results
                             </h2>
-                            
+
                             {leaderboard.length > 0 ? (
                                 <>
                                     <div className="flex flex-col md:flex-row justify-center items-end gap-8 mb-12">
@@ -749,7 +783,7 @@ export default function HostQuiz() {
                                                 </div>
                                             </div>
                                         )}
-                                        
+
                                         <div className="flex-1 order-1 md:order-2 z-10">
                                             <div className="h-32 bg-gradient-to-b from-brand-yellow to-yellow-500 rounded-t-lg flex items-end justify-center p-2">
                                                 <div className="text-center">
@@ -765,7 +799,7 @@ export default function HostQuiz() {
                                                 <p className="text-2xl font-bold text-gray-800">{leaderboard[0]?.score}</p>
                                             </div>
                                         </div>
-                                        
+
                                         {leaderboard.length > 2 && (
                                             <div className="flex-1 order-3">
                                                 <div className="h-20 bg-gradient-to-b from-amber-700 to-amber-800 rounded-t-lg flex items-end justify-center p-2">
@@ -784,7 +818,7 @@ export default function HostQuiz() {
                                             </div>
                                         )}
                                     </div>
-                                    
+
                                     <div className="mb-8">
                                         <h3 className="text-xl font-bold mb-4">All Players</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -816,7 +850,7 @@ export default function HostQuiz() {
                                     <p className="text-gray-500 dark:text-gray-400 mb-6">Try again with at least one player.</p>
                                 </div>
                             )}
-                            
+
                             <div className="flex justify-center">
                                 <button
                                     onClick={() => router.push('/admin')}
