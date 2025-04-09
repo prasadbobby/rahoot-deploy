@@ -269,3 +269,16 @@
     padding-bottom: 64px;
   }
 }
+
+@keyframes radial-pulse {
+  0% {
+    box-shadow: 0 0 0 0px rgba(255, 156, 39, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 30px rgba(255, 156, 39, 0);
+  }
+}
+
+.radial-pulse {
+  animation: radial-pulse 2s infinite;
+}
