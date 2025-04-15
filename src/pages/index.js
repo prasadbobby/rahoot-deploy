@@ -8,6 +8,7 @@ import {
   FaPlay, FaQuestionCircle, FaTrophy, FaPlus, 
   FaMedal, FaUsers, FaChartBar, FaLock, FaArrowRight
 } from 'react-icons/fa';
+import AppLayout from '@/components/layout/AppLayout';
 
 export default function Home() {
   const [quizCode, setQuizCode] = useState('');
@@ -85,6 +86,7 @@ export default function Home() {
   ];
 
   return (
+    <AppLayout>
     <div className="pt-20 md:pt-24">
       {/* Hero Section with Animated Elements */}
       <section className="relative overflow-hidden">
@@ -337,5 +339,6 @@ export default function Home() {
       </div>
     </section>
   </div>
+  </AppLayout>
 );
 }

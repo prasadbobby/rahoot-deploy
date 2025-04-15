@@ -12,6 +12,8 @@ import {
     FaCircle, FaGamepad, FaChevronRight, FaUserPlus, FaHome, FaCheck
 } from 'react-icons/fa';
 import CustomConfetti from '@/components/CustomConfetti';
+import AppLayout from '@/components/layout/AppLayout';
+
 
 export default function HostQuiz() {
     const router = useRouter();
@@ -238,11 +240,11 @@ export default function HostQuiz() {
     }
 
     return (
+        <AppLayout>
         <div className="min-h-screen pt-24 pb-12">
             <CustomConfetti active={showConfetti} />
 
-            {/* Game Control Panel - Always visible */}
-            <div className="fixed top-16 left-0 z-40 w-full bg-gradient-to-r from-brand-red to-brand-blue py-3 shadow-lg">
+            <div className="fixed top-16 left-0 z-40 w-full bg-gradient-to-r from-brand-red to-brand-orange py-3 shadow-lg">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center gap-3">
                     <div className="flex items-center text-white">
                         <div className="bg-white rounded-full p-1 mr-3">
@@ -864,5 +866,6 @@ export default function HostQuiz() {
                 </AnimatePresence>
             </div>
         </div>
+        </AppLayout>
     );
 }

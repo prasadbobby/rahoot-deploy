@@ -10,6 +10,8 @@ import {
   FaTimes, FaHourglassHalf, FaUserAlt, FaCode, FaHome,
   FaBolt, FaExclamationCircle, FaMusic, FaVolumeUp, FaVolumeMute
 } from 'react-icons/fa';
+import AppLayout from '@/components/layout/AppLayout';
+
 
 export default function PlayQuiz() {
   const router = useRouter();
@@ -18,7 +20,7 @@ export default function PlayQuiz() {
   const { socket } = useSocket();
 
   const [quiz, setQuiz] = useState(null);
-  const [gameState, setGameState] = useState('joining'); // joining, waiting, countdown, preview, question, waiting, result, leaderboard, end
+  const [gameState, setGameState] = useState('joining'); // joining, waiting, countdown, preview, question, answering-wait, result, leaderboard, end
   const [username, setUsername] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const [question, setQuestion] = useState(null);
@@ -67,7 +69,7 @@ export default function PlayQuiz() {
       socket.emit('player:join', { 
         username, 
         roomCode: code,
-        userId: user.id || user.email || username // Pass user ID for tracking
+        userId: user.id // Pass user ID for tracking
       });
     });
 
@@ -92,7 +94,7 @@ export default function PlayQuiz() {
       socket.off('player:joined');
       socket.off('error');
     };
-  }, [socket, roomCode, username, router]);
+  }, [socket, roomCode, username, user, router]);
 
   // Set up other socket listeners once joined
   useEffect(() => {
@@ -125,6 +127,8 @@ export default function PlayQuiz() {
       setQuestion(data);
       setPreviewTimeLeft(data.previewTime);
       setGameState('preview');
+      // Reset selected answer for new question
+      setSelectedAnswer(null);
 
       const timer = setInterval(() => {
         setPreviewTimeLeft((prev) => {
@@ -157,7 +161,8 @@ export default function PlayQuiz() {
 
     socket.on('player:answerSubmitted', (data) => {
       setSelectedAnswer(data.answerIndex);
-      setGameState('waiting');
+      // Important: Use "answering-wait" instead of "waiting" state
+      setGameState('answering-wait');
     });
 
     socket.on('game:questionResults', (data) => {
@@ -204,6 +209,8 @@ export default function PlayQuiz() {
 
     setSelectedAnswer(index);
     socket.emit('player:submitAnswer', { roomCode, answer: index });
+    // Set to answering-wait state instead of waiting
+    setGameState('answering-wait');
   };
 
   if (loading) {
@@ -222,6 +229,7 @@ export default function PlayQuiz() {
   }
 
   return (
+    <AppLayout>
     <div className="quiz-container min-h-screen">
       {/* Game Header */}
       <header className="fixed top-16 left-0 right-0 z-30 bg-white dark:bg-brand-dark-card shadow-md py-2">
@@ -251,7 +259,7 @@ export default function PlayQuiz() {
               aria-label={muted ? "Unmute" : "Mute"}
             >
               {muted ? <FaVolumeMute className="h-4 w-4" /> : <FaVolumeUp className="h-4 w-4" />}
-              </button>
+            </button>
             <div className="flex items-center mr-3">
               <div className="h-8 w-8 rounded-full bg-brand-blue flex items-center justify-center text-white">
                 <FaUserAlt className="h-4 w-4" />
@@ -294,35 +302,7 @@ export default function PlayQuiz() {
 
       {/* Game States */}
       <AnimatePresence mode="wait">
-        {gameState === 'joining' && (
-          <motion.div
-            key="joining"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center min-h-[calc(100vh-7rem)] p-6 max-w-md mx-auto pt-20"
-          >
-            <div className="card w-full text-center">
-              <div className="w-20 h-20 mx-auto mb-4 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-red to-brand-blue rounded-full animate-spin-slow"></div>
-                <div className="absolute inset-2 bg-white dark:bg-brand-dark-card rounded-full flex items-center justify-center text-gradient text-2xl font-bold">R</div>
-              </div>
-
-              <h1 className="text-2xl font-bold mb-4">
-                Joining Game
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Connecting to {quiz?.title}...
-              </p>
-
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 flex items-center justify-between">
-                <span className="text-brand-blue font-mono font-bold">{roomCode}</span>
-                <span className="badge badge-primary animate-pulse">Connecting...</span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
+        {/* Waiting to join the game state */}
         {gameState === 'waiting' && (
           <motion.div
             key="waiting"
@@ -365,6 +345,55 @@ export default function PlayQuiz() {
                 <div className="badge badge-secondary animate-pulse flex items-center">
                   <span className="inline-block h-2 w-2 rounded-full bg-current mr-1 animate-ping"></span>
                   Waiting for host...
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Waiting after answering a question - new state */}
+        {gameState === 'answering-wait' && (
+          <motion.div
+            key="answering-wait"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col items-center justify-center min-h-[calc(100vh-7rem)] p-6 max-w-md mx-auto pt-20"
+          >
+            <div className="card w-full text-center">
+              <div className="mx-auto w-24 h-24 bg-brand-blue/10 dark:bg-brand-blue/5 rounded-full flex items-center justify-center mb-6 relative">
+                <div className="absolute inset-0 rounded-full border-4 border-brand-blue/30 border-t-brand-blue animate-spin"></div>
+                <FaHourglassHalf className="w-10 h-10 text-brand-blue" />
+              </div>
+
+              <h2 className="text-2xl font-bold mb-4">
+                Answer Recorded!
+              </h2>
+
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Waiting for all players to answer... Results will be shown shortly!
+              </p>
+
+              <div className="game-grid mb-2">
+                {question && question.answers && question.answers.map((answer, index) => (
+                  <div
+                    key={index}
+                    className={`answer-box ${selectedAnswer === index
+                        ? `${index === 0 ? 'answer-box-red' :
+                          index === 1 ? 'answer-box-blue' :
+                            index === 2 ? 'answer-box-yellow' : 'answer-box-green'} ring-4 ring-white dark:ring-gray-800`
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                      }`}
+                  >
+                    {answer}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 inline-block">
+                <div className="badge badge-primary animate-pulse flex items-center">
+                  <span className="inline-block h-2 w-2 rounded-full bg-current mr-2 animate-ping"></span>
+                  Results coming soon...
                 </div>
               </div>
             </div>
@@ -525,56 +554,6 @@ export default function PlayQuiz() {
           </motion.div>
         )}
 
-
-
-{gameState === 'waiting' && selectedAnswer !== null && (
-  <motion.div
-    key="waiting-answered"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    className="flex flex-col items-center justify-center min-h-[calc(100vh-7rem)] p-6 max-w-md mx-auto pt-20"
-  >
-    <div className="card w-full text-center">
-      <div className="mx-auto w-24 h-24 bg-brand-blue/10 dark:bg-brand-blue/5 rounded-full flex items-center justify-center mb-6 relative">
-        <div className="absolute inset-0 rounded-full border-4 border-brand-blue/30 border-t-brand-blue animate-spin"></div>
-        <FaHourglassHalf className="w-10 h-10 text-brand-blue" />
-      </div>
-
-      <h2 className="text-2xl font-bold mb-4">
-        Answer Recorded!
-      </h2>
-
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
-        Waiting for all players to answer... Results will be shown shortly!
-      </p>
-
-      <div className="game-grid mb-2">
-        {question.answers.map((answer, index) => (
-          <div
-            key={index}
-            className={`answer-box ${selectedAnswer === index
-                ? `${index === 0 ? 'answer-box-red' :
-                  index === 1 ? 'answer-box-blue' :
-                    index === 2 ? 'answer-box-yellow' : 'answer-box-green'} ring-4 ring-white dark:ring-gray-800`
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
-              }`}
-          >
-            {answer}
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 inline-block">
-        <div className="badge badge-primary animate-pulse flex items-center">
-          <span className="inline-block h-2 w-2 rounded-full bg-current mr-2 animate-ping"></span>
-          Results coming soon...
-        </div>
-      </div>
-    </div>
-  </motion.div>
-)}
-
         {gameState === 'result' && result && (
           <motion.div
             key="result"
@@ -623,44 +602,55 @@ export default function PlayQuiz() {
                   <h3 className="text-lg font-bold">Current Standing</h3>
                 </div>
 
-                {leaderboard.slice(0, 3).map((player, index) => (
-                  <div
-                    key={player.id}
-                    className={`flex items-center p-3 rounded-lg mb-2 ${player.id === socket.id ? 'bg-brand-blue/10 dark:bg-brand-blue/5 border border-brand-blue/20' :
-                        'bg-gray-100 dark:bg-gray-800'
+                {leaderboard && leaderboard.slice(0, 3).map((player, index) => {
+                  // Check if this is the current user
+                  const isCurrentUser = player.id === socket.id || 
+                                       (user && player.userId === user.id);
+                  
+                  return (
+                    <div
+                      key={player.id}
+                      className={`flex items-center p-3 rounded-lg mb-2 ${
+                        isCurrentUser 
+                          ? 'bg-brand-blue/10 dark:bg-brand-blue/5 border border-brand-blue/20' 
+                          : 'bg-gray-100 dark:bg-gray-800'
                       }`}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${index === 0 ? 'bg-yellow-500 text-white' :
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${
+                        index === 0 ? 'bg-yellow-500 text-white' :
                         index === 1 ? 'bg-gray-400 text-white' :
-                          'bg-amber-700 text-white'
+                        'bg-amber-700 text-white'
                       }`}>
-                      {index + 1}
-                    </div>
-                    <div className="flex-grow font-medium">
-                      {player.username} {player.id === socket.id && '(You)'}
-                    </div>
-                    <div className="font-bold text-brand-blue">
-                      {player.score}
-                    </div>
-                  </div>
-                ))}
-
-                {!leaderboard.slice(0, 3).some(p => p.id === socket.id) &&
-                  leaderboard.find(p => p.id === socket.id) && (
-                    <div className="mt-2 p-3 bg-brand-blue/10 dark:bg-brand-blue/5 rounded-lg border border-brand-blue/20">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-brand-blue text-white flex items-center justify-center font-bold mr-3">
-                          {leaderboard.findIndex(p => p.id === socket.id) + 1}
-                        </div>
-                        <div className="flex-grow font-medium">
-                          {leaderboard.find(p => p.id === socket.id).username} (You)
-                        </div>
-                        <div className="font-bold text-brand-blue">
-                          {leaderboard.find(p => p.id === socket.id).score}
-                        </div>
+                        {index + 1}
+                      </div>
+                      <div className="flex-grow font-medium">
+                        {player.username} {isCurrentUser && '(You)'}
+                      </div>
+                      <div className="font-bold text-brand-blue">
+                        {player.score}
                       </div>
                     </div>
-                  )}
+                  );
+                })}
+
+                {/* Show current user if not in top 3 */}
+                {leaderboard && 
+                 !leaderboard.slice(0, 3).some(p => p.id === socket.id || (user && p.userId === user.id)) &&
+                 leaderboard.find(p => p.id === socket.id || (user && p.userId === user.id)) && (
+                  <div className="mt-2 p-3 bg-brand-blue/10 dark:bg-brand-blue/5 rounded-lg border border-brand-blue/20">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-full bg-brand-blue text-white flex items-center justify-center font-bold mr-3">
+                        {leaderboard.findIndex(p => p.id === socket.id || (user && p.userId === user.id)) + 1}
+                      </div>
+                      <div className="flex-grow font-medium">
+                        {leaderboard.find(p => p.id === socket.id || (user && p.userId === user.id)).username} (You)
+                      </div>
+                      <div className="font-bold text-brand-blue">
+                        {leaderboard.find(p => p.id === socket.id || (user && p.userId === user.id)).score}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -750,22 +740,22 @@ export default function PlayQuiz() {
                 </div>
 
                 {/* Your position */}
-                {leaderboard.find(p => p.id === socket.id) && (
-  <div className="bg-brand-blue/10 dark:bg-brand-blue/5 border border-brand-blue/20 rounded-lg p-4">
-    <p className="text-center text-gray-700 dark:text-gray-300 mb-2">Your Position</p>
-    <div className="flex items-center">
-      <div className="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center font-bold mr-3">
-        {leaderboard.findIndex(p => p.id === socket.id) + 1}
-      </div>
-      <div className="flex-grow font-medium">
-        {leaderboard.find(p => p.id === socket.id).username} (You)
-      </div>
-      <div className="font-bold text-brand-blue text-xl">
-        {leaderboard.find(p => p.id === socket.id).score || 0}
-      </div>
-    </div>
-  </div>
-)}
+                {leaderboard.find(p => p.id === socket.id || (user && p.userId === user.id)) && (
+                  <div className="bg-brand-blue/10 dark:bg-brand-blue/5 border border-brand-blue/20 rounded-lg p-4">
+                    <p className="text-center text-gray-700 dark:text-gray-300 mb-2">Your Position</p>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-brand-blue text-white flex items-center justify-center font-bold mr-3">
+                        {leaderboard.findIndex(p => p.id === socket.id || (user && p.userId === user.id)) + 1}
+                      </div>
+                      <div className="flex-grow font-medium">
+                        {leaderboard.find(p => p.id === socket.id || (user && p.userId === user.id)).username} (You)
+                      </div>
+                      <div className="font-bold text-brand-blue text-xl">
+                        {leaderboard.find(p => p.id === socket.id || (user && p.userId === user.id)).score || 0}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button
@@ -780,5 +770,6 @@ export default function PlayQuiz() {
         )}
       </AnimatePresence>
     </div>
+    </AppLayout>
   );
 }

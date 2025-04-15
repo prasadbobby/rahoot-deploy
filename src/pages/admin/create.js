@@ -5,6 +5,8 @@ import { createQuiz } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import AppLayout from '@/components/layout/AppLayout';
+
 
 export default function CreateQuiz() {
   const { user, isAdmin } = useAuth();
@@ -170,6 +172,7 @@ export default function CreateQuiz() {
   }
 
   return (
+    <AppLayout>
     <div className="pt-24 pb-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
@@ -508,5 +511,6 @@ export default function CreateQuiz() {
         )}
       </div>
     </div>
+    </AppLayout>
   );
 }

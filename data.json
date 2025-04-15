@@ -470,6 +470,34 @@
           "score": 0
         }
       ]
+    },
+    {
+      "id": "75d5aa16-f7ea-45ca-a13c-879fc1a3488c",
+      "quizId": "5c839db7-6ed7-4330-9b20-a3606f7a71ea",
+      "quizTitle": "Test quiz",
+      "quizSubject": "java",
+      "date": "2025-04-15T04:08:21.185Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "userId": "116724717905662795487",
+          "score": 1743
+        }
+      ]
+    },
+    {
+      "id": "d1a83ac7-9f0a-4d3c-a474-90b0406db1cf",
+      "quizId": "9a98d6c9-7587-4cfa-8094-120b9862a3df",
+      "quizTitle": "HTML topics",
+      "quizSubject": "html",
+      "date": "2025-04-15T15:57:21.920Z",
+      "players": [
+        {
+          "username": "Bobby",
+          "userId": "116724717905662795487",
+          "score": 1531
+        }
+      ]
     }
   ]
 }

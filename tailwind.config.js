@@ -20,11 +20,20 @@ module.exports = {
           'dark-card': '#252836',
           light: '#F0F4F8',
           card: '#FFFFFF',
+          'text-primary-light': '#1A1B25',
+        'text-primary-dark': 'white',
+        'text-secondary-light': '#64748b',
+        'text-secondary-dark': '#94a3b8',
+
         }
       },
       backgroundImage: {
         'gradient-game': 'linear-gradient(to right, #FF3366, #FF7F00)',
         'gradient-eye': 'linear-gradient(to bottom, #FF3366, #9900CC)',
+      },
+      backgroundColor: {
+        'card-light': 'white',
+        'card-dark': '#252836',
       },
       scale: {
         '102': '1.02',

@@ -11,6 +11,8 @@ import {
   FaEllipsisH, FaExternalLinkAlt
 } from 'react-icons/fa';
 import AdminGuard from '@/components/guards/AdminGuard';
+import AppLayout from '@/components/layout/AppLayout';
+
 
 export default function AdminDashboard() {
   const [quizzes, setQuizzes] = useState([]);
@@ -124,6 +126,7 @@ export default function AdminDashboard() {
   }
 
   return (
+    <AppLayout>
     <AdminGuard>
     <div className="pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -549,5 +552,6 @@ export default function AdminDashboard() {
       </AnimatePresence>
     </div>
     </AdminGuard>
+    </AppLayout>
   );
 }

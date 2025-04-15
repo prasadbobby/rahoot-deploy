@@ -1,3 +1,4 @@
+// src/contexts/ThemeContext.js
 import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext(null);
@@ -6,7 +7,7 @@ export function ThemeProvider({ children }) {
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    // Check for system preference or stored preference
+    // Check for system preference or stored preference on initial load
     const isDark = 
       localStorage.getItem('darkMode') === 'true' || 
       (localStorage.getItem('darkMode') === null && 
@@ -14,19 +15,20 @@ export function ThemeProvider({ children }) {
     
     setDarkMode(isDark);
     
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Apply the theme to the document
+    applyTheme(isDark);
   }, []);
 
   const toggleDarkMode = () => {
     const newMode = !darkMode;
     setDarkMode(newMode);
     localStorage.setItem('darkMode', newMode);
-    
-    if (newMode) {
+    applyTheme(newMode);
+  };
+
+  // Function to apply theme to document
+  const applyTheme = (isDark) => {
+    if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
